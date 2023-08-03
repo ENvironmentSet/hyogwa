@@ -1,0 +1,36 @@
+{
+  "name": "hyogwa",
+  "version": "0.0.0",
+  "description": "Natural \uD83C\uDF3F effect system that fits for TypeScript",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ENvironmentSet/hyogwa.git"
+  },
+  "keywords": [
+    "algebraic",
+    "effects",
+    "functional",
+    "programming",
+    "extensible",
+    "effects",
+    "computational",
+    "effects",
+    "effect",
+    "system",
+    "typescript"
+  ],
+  "author": "ENvironmentSet",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ENvironmentSet/hyogwa/issues"
+  },
+  "homepage": "https://github.com/ENvironmentSet/hyogwa#readme",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}
