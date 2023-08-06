@@ -54,15 +54,19 @@ interface EffectConstructor {
   new <S extends Spec>(name: S[typeof EFFECT_NAME]): Effect<S>
 }
 
-export const Effect: EffectConstructor = ((effectName: string) => {
+export const Effect: EffectConstructor = (function (effectName: string) {
   const base = {
     [Symbol.toPrimitive]: () => effectName
   }
 
   return new Proxy(base, {
-    get: (_, constructorName) =>
-      // @ts-ignore-next-line
-      (...parameters) => ({ effectName, constructorName, parameters })
+    get(_, constructorName) {
+      //@ts-ignore-next-line
+      return function* (...parameters) {
+        //@ts-ignore-next-line
+        return yield { effectName, constructorName, parameters }
+      }
+    }
   })
 }) as any // this is OK
 
@@ -121,7 +125,7 @@ export function* handle<E extends Spec, R, H extends HandlersFromSpecs<E>>(compu
       // @ts-ignore-next-line
       const maybeComputation = handlers[action.effectName][action.constructorName](...action.parameters, value => (flag = true, thrown = computation.next(value)))
 
-      if (Symbol.iterator in maybeComputation)
+      if (typeof maybeComputation === 'object' && maybeComputation !== null && Symbol.iterator in maybeComputation)
         yield* maybeComputation
 
     } else {
