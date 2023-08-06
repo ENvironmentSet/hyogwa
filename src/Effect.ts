@@ -16,7 +16,7 @@ export interface Spec<N extends string = string> {
 /**
  * Type of Actions(Effectful terms/codes/operations)
  *
- * Parameterized by name of the effect where action is belong('EN'), name of the action constructor('CN')
+ * Parameterized by name of the effect where the action belongs('EN'), name of the action constructor('CN')
  * and type of parameters the action requires('P')
  */
 interface Action<EN, CN, P> {
