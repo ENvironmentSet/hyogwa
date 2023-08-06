@@ -39,6 +39,17 @@ type ActionsFromSpecs<S extends Spec>
         : never
       : never
 
+/**
+ * Type of effectful computation
+ *
+ * Parameterized by spec of effects('S') and evaluation result type('R').
+ * It's possible to provide multiple effect spec by combining specs via union.
+ *
+ * Theoretically, Effectful computation is Generator object that...
+ *
+ * 1. May yield arbitrary number of actions.
+ * 2. Must return computation result of type 'R' as return value.
+ */
 export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs<S>, R> {
   [Symbol.iterator](): Effectful<S, R>
 }
