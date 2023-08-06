@@ -174,7 +174,7 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
     return new Promise((resolve, reject) => {
       const thrown = comp.next(nextVal)
 
-      if (thrown.done) return Promise.resolve(thrown.value)
+      if (thrown.done) return resolve(thrown.value)
 
       const { effectName, constructorName, parameters } = thrown.value
 
