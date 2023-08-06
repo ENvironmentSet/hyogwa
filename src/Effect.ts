@@ -62,10 +62,18 @@ export const Effect: EffectConstructor = (function (effectName: string) {
   return new Proxy(base, {
     get(_, constructorName) {
       //@ts-ignore-next-line
-      return function* (...parameters) {
+      const result = function* (...parameters) {
         //@ts-ignore-next-line
         return yield { effectName, constructorName, parameters }
       }
+
+      //@ts-ignore-next-line
+      result[Symbol.iterator] = function* () {
+        //@ts-ignore-next-line
+        return yield { effectName, constructorName }
+      }
+
+      return result
     }
   })
 }) as any // this is OK
@@ -123,13 +131,19 @@ export function* handle<E extends Spec, R, H extends HandlersFromSpecs<E>>(compu
     // @ts-ignore-next-line
     if (action.effectName in handlers && action.constructorName in handlers[action.effectName]) {
       // @ts-ignore-next-line
-      const maybeComputation = handlers[action.effectName][action.constructorName](...action.parameters, value => (flag = true, thrown = computation.next(value)))
+      if (typeof handlers[action.effectName][action.constructorName] !== 'function') {
+        // @ts-ignore-next-line
+        thrown = computation.next(handlers[action.effectName][action.constructorName])
+        flag = true
+      } else {
+        // @ts-ignore-next-line
+        const maybeComputation = handlers[action.effectName][action.constructorName](...action.parameters, value => (flag = true, thrown = computation.next(value)))
 
-      if (typeof maybeComputation === 'object' && maybeComputation !== null && Symbol.iterator in maybeComputation)
-        yield* maybeComputation
-
+        if (typeof maybeComputation === 'object' && maybeComputation !== null && Symbol.iterator in maybeComputation)
+          yield* maybeComputation
+      }
     } else {
-      computation.next(yield action)
+      thrown = computation.next(yield action)
       flag = true
     }
   }
@@ -156,8 +170,10 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
 
       //@ts-ignore-next-line
       if (effectName in handlers && constructorName in handlers[effectName])
+        // @ts-ignore-next-line
+        if (typeof handlers[effectName][constructorName] !== 'function') computation.next(handlers[action.effectName][action.constructorName])
         //@ts-ignore-next-line
-        handlers[effectName][constructorName](...parameters, value => {
+        else handlers[effectName][constructorName](...parameters, value => {
           resolve(unsafeAsyncRunner(comp, value))
         })
       else reject(new Error('Unhandled Action found'))
