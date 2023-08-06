@@ -39,7 +39,6 @@ type ActionsFromSpecs<S extends Spec>
         : never
       : never
 
-
 export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs<S>, R> {
   [Symbol.iterator](): Effectful<S, R>
 }
