@@ -3,11 +3,11 @@ import { UnionToIntersection } from './UnionToIntersection'
 const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
 
 /**
- * This type has 2 meaning:
- * 1. Base type for effect specification(descriptor) types
- * 2. Type of Types which describe effects (i.e. Kind of effect descriptor types)
+ * This type has two different meaning:
+ * 1. Base type for effect specification types
+ * 2. Type of Types which includes every possible effect specification types (i.e. Kind of effect specification types)
  *
- * (2nd one is possible thanks to subtype polymorphism)
+ * (second one is possible thanks to subtype polymorphism)
  */
 export interface Spec<N extends string = string> {
   [EFFECT_NAME]: N
