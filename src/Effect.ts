@@ -240,11 +240,17 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
       //@ts-ignore-next-line
       if (effectName in handlers && constructorName in handlers[effectName])
         // @ts-ignore-next-line
-        if (typeof handlers[effectName][constructorName] !== 'function') computation.next(handlers[action.effectName][action.constructorName])
+        if (typeof handlers[effectName][constructorName] !== 'function')
+          // @ts-ignore-next-line
+          resolve(unsafeRunAsync(comp, handlers[action.effectName][action.constructorName]))
         //@ts-ignore-next-line
-        else handlers[effectName][constructorName](...parameters, value => {
-          resolve(unsafeAsyncRunner(comp, value))
-        })
+        else handlers[effectName][constructorName](
+          // @ts-ignore-next-line
+          ...parameters,
+          // @ts-ignore-next-line
+          value => {
+            resolve(unsafeAsyncRunner(comp, value))
+          })
       else reject(new Error('Unhandled Action found'))
     })
   }
