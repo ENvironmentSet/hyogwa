@@ -110,6 +110,10 @@ type HandlerFromSpec<S extends Spec> = {
       (...args: [...P, (result: R) => never]) => void | Effectful<Spec, void>
       : S[K] | Effectful<Spec, S[K]>
 }
+/** it's okay to leave place of effect with most general type 'Spec'
+ * using type variable and inference smart will care your concern
+ * ref: 'handle' function
+ */
 
 type HandlersFromSpecs<S extends Spec>
   = UnionToIntersection<
