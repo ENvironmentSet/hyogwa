@@ -62,7 +62,7 @@ export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs
  */
 type Effect<S extends Spec> = {
   [K in Exclude<keyof S, typeof EFFECT_NAME>]: S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
-} & S[typeof EFFECT_NAME]
+}
 
 /**
  * Type utility for deriving new effect from another
@@ -80,9 +80,7 @@ interface EffectConstructor {
  * returns an actual effect representation. Actual effect representation contains action constructors.
  */
 export const Effect: EffectConstructor = (function (effectName: string) {
-  const base = {
-    [Symbol.toPrimitive]: () => effectName
-  }
+  const base = {}
 
   return new Proxy(base, {
     get(_, constructorName) {
