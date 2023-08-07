@@ -25,8 +25,10 @@ interface Action<EN, CN, P> {
   parameters: P
 }
 
+type PickActionNames<S extends Spec> = Exclude<keyof S, typeof EFFECT_NAME>
+
 type ActionFromSpec<S extends Spec>
-  = Exclude<keyof S, typeof EFFECT_NAME> extends infer K ?
+  = PickActionNames<S> extends infer K ?
       K extends keyof S ?
         Action<S[typeof EFFECT_NAME], K, S[K] extends (...args: infer P) => unknown ? P : never>
         : never
@@ -61,7 +63,7 @@ export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs
  * Takes an effect spec and returns actual representation of that effect
  */
 type Effect<S extends Spec> = {
-  [K in Exclude<keyof S, typeof EFFECT_NAME>]: S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
+  [K in PickActionNames<S>]: S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
 }
 
 /**
@@ -69,27 +71,24 @@ type Effect<S extends Spec> = {
  */
 export type Derive<N extends string, S extends Spec> = Omit<S, typeof EFFECT_NAME> & { [EFFECT_NAME]: `${N}` }
 
-interface EffectConstructor {
-  new <S extends Spec>(name: S[typeof EFFECT_NAME]): Effect<S>
-}
-
 /**
  * Effect constructor
  *
  * Given an effect specification as type argument and an effect name as actual argument,
  * returns an actual effect representation. Actual effect representation contains action constructors.
  */
-export const Effect: EffectConstructor = (function (effectName: string) {
-  const base = {}
-
-  return new Proxy(base, {
+export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]): Effect<S> {
+  return new Proxy({}, {
+    // Property accesses which have passed type check are always access to action creators
     get(_, constructorName) {
+      // Action creator for function effects
       //@ts-ignore-next-line
       const result = function* (...parameters) {
         //@ts-ignore-next-line
         return yield { effectName, constructorName, parameters }
       }
 
+      // Action creator for value effects
       //@ts-ignore-next-line
       result[Symbol.iterator] = function* () {
         //@ts-ignore-next-line
@@ -98,8 +97,9 @@ export const Effect: EffectConstructor = (function (effectName: string) {
 
       return result
     }
-  })
-}) as any // this is OK
+  }) as Effect<S>
+}
+//@TODO: make this function only require spec of new effect
 
 /**
  * Produce handler type definition for given effect(specification)
