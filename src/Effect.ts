@@ -32,6 +32,7 @@ type ActionFromSpec<S extends Spec>
         : never
       : never
 
+/** ActionFromSpec iterating over union of specs */
 type ActionsFromSpecs<S extends Spec>
   = S extends infer S_ ?
       S_ extends Spec ?
@@ -54,16 +55,30 @@ export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs
   [Symbol.iterator](): Effectful<S, R>
 }
 
+/**
+ * Type of Effect
+ *
+ * Takes an effect spec and returns actual representation of that effect
+ */
 type Effect<S extends Spec> = {
   [K in Exclude<keyof S, typeof EFFECT_NAME>]: S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
 } & S[typeof EFFECT_NAME]
 
+/**
+ * Type utility for deriving new effect from another
+ */
 export type Derive<N extends string, S extends Spec> = Omit<S, typeof EFFECT_NAME> & { [EFFECT_NAME]: `${N}` }
 
 interface EffectConstructor {
   new <S extends Spec>(name: S[typeof EFFECT_NAME]): Effect<S>
 }
 
+/**
+ * Effect constructor
+ *
+ * Given an effect specification as type argument and an effect name as actual argument,
+ * returns an actual effect representation. Actual effect representation contains action constructors.
+ */
 export const Effect: EffectConstructor = (function (effectName: string) {
   const base = {
     [Symbol.toPrimitive]: () => effectName
@@ -88,6 +103,9 @@ export const Effect: EffectConstructor = (function (effectName: string) {
   })
 }) as any // this is OK
 
+/**
+ * Produce handler type definition for given effect(specification)
+ */
 type HandlerFromSpec<S extends Spec> = {
   [K in Exclude<keyof S, typeof EFFECT_NAME>]:
     S[K] extends (...args: infer P) => infer R ?
@@ -113,6 +131,9 @@ type TotalHandlersFromSpecs<S extends Spec>
     : never
 >
 
+/**
+ * Collects used effects from given handler(type)
+ */
 type CollectEffectsFromHandlers<H>
   = keyof H extends infer K1 ?
       K1 extends keyof H ?
@@ -128,6 +149,9 @@ type CollectEffectsFromHandlers<H>
         : never
       : never
 
+/**
+ * Resolves some effects of given computation by attaching handlers
+ */
 export function* handle<E extends Spec, R, H extends HandlersFromSpecs<E>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
@@ -161,14 +185,31 @@ export function* handle<E extends Spec, R, H extends HandlersFromSpecs<E>>(compu
   return thrown.value
 } // TOTAL MESS
 
+/**
+ * runs any pure computation
+ */
 export function run<R>(comp: Effectful<never, R>): R {
   return comp.next().value
 }
 
+/**
+ * Given any effectful computation and handlers that resolves every possible effects of that computation,
+ * run the computation synchronously.
+ *
+ * NOTE: handlers must not produce new (hyogwa) effects since it's not possible to set more handlers after this function
+ * NOTE: this is UNSAFE since it doesn't check whether given handlers are valid or not
+ */
 export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers: TotalHandlersFromSpecs<E>): R {
   return run(handle(comp, handlers))
 }
 
+/**
+ * Given any effectful computation and handlers that resolves every possible effects of that computation,
+ * run the computation asynchronously. Handlers given to this function are allowed to call 'resume' any time.
+ *
+ * NOTE: handlers must not produce new (hyogwa) effects since it's not possible to set more handlers after this function
+ * NOTE: this is UNSAFE since it doesn't check whether given handlers are valid or not
+ */
 export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handlers: TotalHandlersFromSpecs<E>): Promise<R> {
   function unsafeAsyncRunner(comp: Effectful<E, R>, nextVal: unknown): Promise<R> {
     return new Promise((resolve, reject) => {
