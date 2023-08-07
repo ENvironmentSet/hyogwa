@@ -117,21 +117,15 @@ type HandlerFromSpec<S extends Spec> = {
 
 type HandlersFromSpecs<S extends Spec>
   = UnionToIntersection<
-      S extends infer S_ ?
-        S_ extends Spec ?
-          { [K in PickActionNames<S>]?: HandlerFromSpec<S> }
-          : never
-        : never
-    >
-
-type TotalHandlersFromSpecs<S extends Spec>
-  = UnionToIntersection<
   S extends infer S_ ?
     S_ extends Spec ?
-      { [K in PickActionNames<S>]: HandlerFromSpec<S> }
+      { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S> }
       : never
     : never
 >
+
+type PartialHandlersFromSpecs<S extends Spec>
+  = Partial<HandlersFromSpecs<S>>
 
 /**
  * Collects used effects from given handler(type)
@@ -154,7 +148,7 @@ type CollectEffectsFromHandlers<H>
 /**
  * Resolves some effects of given computation by attaching handlers
  */
-export function* handle<E extends Spec, R, H extends HandlersFromSpecs<E>>(computation: Effectful<E, R>, handlers: H)
+export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
   let thrown = computation.next()
@@ -201,7 +195,7 @@ export function run<R>(comp: Effectful<never, R>): R {
  * NOTE: handlers must not produce new (hyogwa) effects since it's not possible to set more handlers after this function
  * NOTE: this is UNSAFE since it doesn't check whether given handlers are valid or not
  */
-export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers: TotalHandlersFromSpecs<E>): R {
+export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers: HandlersFromSpecs<E>): R {
   return run(handle(comp, handlers))
 }
 
@@ -212,7 +206,7 @@ export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers
  * NOTE: handlers must not produce new (hyogwa) effects since it's not possible to set more handlers after this function
  * NOTE: this is UNSAFE since it doesn't check whether given handlers are valid or not
  */
-export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handlers: TotalHandlersFromSpecs<E>): Promise<R> {
+export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handlers: HandlersFromSpecs<E>): Promise<R> {
   function unsafeAsyncRunner(comp: Effectful<E, R>, nextVal: unknown): Promise<R> {
     return new Promise((resolve, reject) => {
       const thrown = comp.next(nextVal)
