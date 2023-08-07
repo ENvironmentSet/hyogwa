@@ -107,7 +107,7 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
 type HandlerFromSpec<S extends Spec> = {
   [K in PickActionNames<S>]:
     S[K] extends (...args: infer P) => infer R ?
-      ((...args: [...P, (result: R) => never]) => void) | ((...args: [...P, (result: R) => never]) => Effectful<Spec, void>)
+      (...args: [...P, (result: R) => never]) => void | Effectful<Spec, void>
       : S[K] | Effectful<Spec, S[K]>
 }
 
