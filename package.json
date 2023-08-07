@@ -5,8 +5,8 @@
   "type": "module",
   "exports": "./src/index.ts",
   "scripts": {
-    "build": "tsc",
-    "prepare": "npm run build"
+    "typecheck": "tsc",
+    "prepare": "npm run typecheck"
   },
   "repository": {
     "type": "git",
