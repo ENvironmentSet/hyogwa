@@ -105,7 +105,7 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
  * Produce handler type definition for given effect(specification)
  */
 type HandlerFromSpec<S extends Spec> = {
-  [K in Exclude<keyof S, typeof EFFECT_NAME>]:
+  [K in PickActionNames<S>]:
     S[K] extends (...args: infer P) => infer R ?
       ((...args: [...P, (result: R) => never]) => void) | ((...args: [...P, (result: R) => never]) => Effectful<Spec, R>)
       : S[K] | Effectful<Spec, S[K]>
@@ -115,7 +115,7 @@ type HandlersFromSpecs<S extends Spec>
   = UnionToIntersection<
       S extends infer S_ ?
         S_ extends Spec ?
-          { [K in S_[typeof EFFECT_NAME]]?: HandlerFromSpec<S> }
+          { [K in PickActionNames<S>]?: HandlerFromSpec<S> }
           : never
         : never
     >
@@ -124,7 +124,7 @@ type TotalHandlersFromSpecs<S extends Spec>
   = UnionToIntersection<
   S extends infer S_ ?
     S_ extends Spec ?
-      { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S> }
+      { [K in PickActionNames<S>]: HandlerFromSpec<S> }
       : never
     : never
 >
