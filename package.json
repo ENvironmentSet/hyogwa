@@ -13,16 +13,11 @@
     "url": "git+https://github.com/ENvironmentSet/hyogwa.git"
   },
   "keywords": [
-    "algebraic",
-    "effects",
-    "functional",
-    "programming",
-    "extensible",
-    "effects",
-    "computational",
-    "effects",
-    "effect",
-    "system",
+    "algebraic effects",
+    "functional programming",
+    "extensible effects",
+    "computational effects",
+    "effect system",
     "typescript"
   ],
   "author": "ENvironmentSet",
