@@ -1,1 +1,2 @@
-export { Spec, Effect, Effectful, handle, run, unsafeRunSync, unsafeRunAsync } from './Effect'
+export { Spec, Effect, Effectful, handle } from './Effect'
+export { run, unsafeRunSync, unsafeRunAsync } from './runners'
