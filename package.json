@@ -4,6 +4,7 @@
   "description": "Natural \uD83C\uDF3F effect system that fits for TypeScript",
   "type": "module",
   "exports": "./src/index.ts",
+  "sideEffects": false,
   "scripts": {
     "typecheck": "tsc",
     "prepare": "npm run typecheck"
