@@ -145,41 +145,63 @@ type CollectEffectsFromHandlers<H>
         : never
       : never
 
+function isGenerator(value: unknown): value is Generator {
+  if (typeof value !== 'object') return false
+  if (value === null) return false
+  if (typeof Object.getPrototypeOf(value) !== 'function') return false
+  return typeof Object.getPrototypeOf(Object.getPrototypeOf(value)) === Object.getPrototypeOf(function* () {})
+}
+
 /**
  * Resolves some effects of given computation by attaching handlers
+ *
+ * Handlers must handle effects with handle tactics(ex: 'resume') before they return something
+ * Assumption: given computation must be 'fresh' one (i.e. the one never executed after creation)
  */
 export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
   let thrown = computation.next()
-  let flag = true
+  let isPreviousEffectResolved = true
 
-  while (!thrown.done && flag) {
+  while (!thrown.done && isPreviousEffectResolved) {
     const action = thrown.value
-    flag = false
+    isPreviousEffectResolved = false
 
     // @ts-ignore-next-line
     if (action.effectName in handlers && action.constructorName in handlers[action.effectName]) {
+      // handle value effects
       // @ts-ignore-next-line
       if (typeof handlers[action.effectName][action.constructorName] !== 'function') {
         // @ts-ignore-next-line
         thrown = computation.next(handlers[action.effectName][action.constructorName])
-        flag = true
+        isPreviousEffectResolved = true
       } else {
+        // handle operational effects
         // @ts-ignore-next-line
-        const maybeComputation = handlers[action.effectName][action.constructorName](...action.parameters, value => (flag = true, thrown = computation.next(value)))
+        const maybeComputation = handlers[action.effectName][action.constructorName](
+          // @ts-ignore-next-line
+          ...action.parameters,
+          // @ts-ignore-next-line
+          value => {
+            isPreviousEffectResolved = true
+            thrown = computation.next(value)
+          })
 
-        if (typeof maybeComputation === 'object' && maybeComputation !== null && Symbol.iterator in maybeComputation)
+        // handle handlers which produce more effects
+        if (isGenerator(maybeComputation)) //@FIXME: What if user returns non-Effectful generator? <-- problematic case
+          // @ts-ignore-next-line
           yield* maybeComputation
       }
     } else {
+      // case when handler for given action is not exist
       thrown = computation.next(yield action)
-      flag = true
+      isPreviousEffectResolved = true
     }
   }
 
   return thrown.value
-} // TOTAL MESS
+}
 
 /**
  * runs any pure computation
