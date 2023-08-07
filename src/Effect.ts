@@ -1,4 +1,5 @@
 import { UnionToIntersection } from './UnionToIntersection'
+import { isGenerator } from './isGenerator'
 
 const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
 
@@ -144,13 +145,6 @@ type CollectEffectsFromHandlers<H>
           : never
         : never
       : never
-
-function isGenerator(value: unknown): value is Generator {
-  if (typeof value !== 'object') return false
-  if (value === null) return false
-  if (typeof Object.getPrototypeOf(value) !== 'function') return false
-  return typeof Object.getPrototypeOf(Object.getPrototypeOf(value)) === Object.getPrototypeOf(function* () {})
-}
 
 /**
  * Resolves some effects of given computation by attaching handlers
