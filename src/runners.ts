@@ -1,4 +1,4 @@
-import { Effectful, handle, Spec, HandlersFromSpecs, HandlerError } from './core';
+import { Effectful, handle, Spec, HandlersFromSpecs } from './core';
 
 /**
  * runs any pure computation
@@ -27,7 +27,7 @@ export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers
  */
 export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handlers: HandlersFromSpecs<E, R>): Promise<R> {
   function unsafeAsyncRunner(comp: Effectful<E, R>, nextVal: unknown): Promise<R> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const thrown = comp.next(nextVal)
 
       if (thrown.done) return resolve(thrown.value)
@@ -55,7 +55,6 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
               resolve(value)
             }
           })
-      else reject(new HandlerError(thrown.value, 'Unhandled Action found'))
     })
   }
 
