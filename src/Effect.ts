@@ -194,5 +194,7 @@ export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>
     }
   }
 
+  if (!isPreviousEffectResolved) throw new Error('Effect handlers must call handle tactics')
+
   return thrown.value
 }
