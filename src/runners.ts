@@ -1,4 +1,4 @@
-import { Effectful, handle, Spec, HandlersFromSpecs, HandlerError } from './Effect';
+import { Effectful, handle, Spec, HandlersFromSpecs, HandlerError } from './core';
 
 /**
  * runs any pure computation
