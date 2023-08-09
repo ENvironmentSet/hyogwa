@@ -231,7 +231,7 @@ export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, 
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H)
-  : (computation: Effectful<E, R>, ) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+  : (computation: Effectful<E, R>) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R>)
   : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) | ((computation: Effectful<E, R>, ) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
   if (!second) return computation => handle_<E, R, H>(computation, first as H)
