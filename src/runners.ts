@@ -39,7 +39,7 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
         // @ts-ignore-next-line
         if (typeof handlers[effectName][constructorName] !== 'function')
           // @ts-ignore-next-line
-          resolve(unsafeRunAsync(comp, handlers[action.effectName][action.constructorName]))
+          resolve(unsafeAsyncRunner(comp, handlers[action.effectName][action.constructorName]))
         //@ts-ignore-next-line
         else handlers[effectName][constructorName](
           // @ts-ignore-next-line
@@ -48,7 +48,7 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
           {
             // @ts-ignore-next-line
             resume(value) {
-              resolve(unsafeRunAsync(comp, value))
+              resolve(unsafeAsyncRunner(comp, value))
             },
             // @ts-ignore-next-line
             abort(value) {
