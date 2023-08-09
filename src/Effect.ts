@@ -183,7 +183,7 @@ export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>
           })
 
         // handle handlers which produce more effects
-        if (isGenerator(maybeComputation)) //@FIXME: What if user returns non-Effectful generator? <-- problematic case
+        if (isGenerator(maybeComputation))
           // @ts-ignore-next-line
           yield* maybeComputation
       }
