@@ -1,4 +1,4 @@
-import { Effectful, handle, Spec, HandlersFromSpecs } from './Effect';
+import { Effectful, handle, Spec, HandlersFromSpecs, HandlerError } from './Effect';
 
 /**
  * runs any pure computation
@@ -48,7 +48,7 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
           value => {
             resolve(unsafeAsyncRunner(comp, value))
           })
-      else reject(new Error('Unhandled Action found'))
+      else reject(new HandlerError(thrown.value, 'Unhandled Action found'))
     })
   }
 
