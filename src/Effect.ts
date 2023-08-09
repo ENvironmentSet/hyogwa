@@ -102,13 +102,18 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
 }
 //@TODO: make this function only require spec of new effect
 
+interface HandleTactics<ER, R> {
+  resume(value: ER): void
+  abort(value: R): void
+}
+
 /**
  * Produce handler type definition for given effect(specification)
  */
-type HandlerFromSpec<S extends Spec> = {
+type HandlerFromSpec<S extends Spec, R> = {
   [K in PickActionNames<S>]:
-    S[K] extends (...args: infer P) => infer R ?
-      (...args: [...P, (result: R) => never]) => void | Effectful<Spec, void>
+    S[K] extends (...args: infer P) => infer ER ?
+      (...args: [...P, HandleTactics<ER, R>]) => void | Effectful<Spec, void>
       : S[K] | Effectful<Spec, S[K]>
 }
 /** it's okay to leave place of effect with most general type 'Spec'
@@ -116,17 +121,17 @@ type HandlerFromSpec<S extends Spec> = {
  * ref: 'handle' function
  */
 
-export type HandlersFromSpecs<S extends Spec>
+export type HandlersFromSpecs<S extends Spec, R>
   = UnionToIntersection<
   S extends infer S_ ?
     S_ extends Spec ?
-      { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S> }
+      { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S, R> }
       : never
     : never
 >
 
-type PartialHandlersFromSpecs<S extends Spec>
-  = Partial<HandlersFromSpecs<S>>
+type PartialHandlersFromSpecs<S extends Spec, R>
+  = Partial<HandlersFromSpecs<S, R>>
 
 /**
  * Collects used effects from given handler(type)
@@ -152,13 +157,15 @@ type CollectEffectsFromHandlers<H>
  * Handlers must handle effects with handle tactics(ex: 'resume') before they return something
  * Assumption: given computation must be 'fresh' one (i.e. the one never executed after creation)
  */
-export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>>(computation: Effectful<E, R>, handlers: H)
+export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
   let thrown = computation.next()
   let isPreviousEffectResolved = true
+  let aborted = false
+  let abortedValue
 
-  while (!thrown.done && isPreviousEffectResolved) {
+  while (!thrown.done && isPreviousEffectResolved && !aborted) {
     const action = thrown.value
     isPreviousEffectResolved = false
 
@@ -176,10 +183,18 @@ export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>
         const maybeComputation = handlers[action.effectName][action.constructorName](
           // @ts-ignore-next-line
           ...action.parameters,
-          // @ts-ignore-next-line
-          value => {
-            isPreviousEffectResolved = true
-            thrown = computation.next(value)
+          {
+            // @ts-ignore-next-line
+            resume(value) {
+              thrown = computation.next(value)
+              isPreviousEffectResolved = true
+            },
+            // @ts-ignore-next-line
+            abort(value) {
+              abortedValue = value
+              isPreviousEffectResolved = true
+              aborted = true
+            }
           })
 
         // handle handlers which produce more effects
@@ -196,5 +211,5 @@ export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E>
 
   if (!isPreviousEffectResolved) throw new Error('Effect handlers must call handle tactics')
 
-  return thrown.value
+  return aborted ? abortedValue! : thrown.value
 }
