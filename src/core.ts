@@ -193,6 +193,7 @@ function* _handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(c
             },
             // @ts-ignore-next-line
             abort(value) {
+              // mark effect handling process is aborted and save return value
               abortedValue = value
               isPreviousEffectResolved = true
               aborted = true
