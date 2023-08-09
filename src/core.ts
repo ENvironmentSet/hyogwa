@@ -201,7 +201,7 @@ function* _handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(c
           })
 
         // handle handlers which produce more effects
-        if (Symbol.iterator in maybeComputation)
+        if (typeof maybeComputation?.[Symbol.iterator] === 'function')
           // @ts-ignore-next-line
           yield* maybeComputation
       }
