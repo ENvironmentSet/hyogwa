@@ -226,9 +226,9 @@ function* handle_<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(c
  *
  * To find actual implementation, see 'handle_' function.
  */
-export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
-  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
+  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H)
   : (computation: Effectful<E, R>, ) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
