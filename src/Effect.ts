@@ -160,13 +160,7 @@ export class HandlerError extends Error {
   }
 }
 
-/**
- * Resolves some effects of given computation by attaching handlers
- *
- * Handlers must handle effects with handle tactics(ex: 'resume') before they return something
- * Assumption: given computation must be 'fresh' one (i.e. the one never executed after creation)
- */
-export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
+function* handle_<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
   let thrown = computation.next()
@@ -222,4 +216,22 @@ export function* handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E,
     throw new HandlerError(thrown.value as Action<string, string, unknown[]>, 'Effect handlers must call handle tactics')
 
   return aborted ? abortedValue! : thrown.value
+}
+
+/**
+ * Resolves some effects of given computation by attaching handlers
+ *
+ * Handlers must handle effects with handle tactics(ex: 'resume') before they return something
+ * Assumption: given computation must be 'fresh' one (i.e. the one never executed after creation)
+ *
+ * To find actual implementation, see 'handle_' function.
+ */
+export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
+  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
+  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(first: Effectful<E, R> | H, second: H | Effectful<E, R>)
+  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
+  if (isGenerator(first)) return handle_<E, R, H>(first, second as H)
+  else return handle_<E, R, H>(second as Effectful<E, R>, first)
 }
