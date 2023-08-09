@@ -231,10 +231,10 @@ export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, 
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H)
-  : (computation: Effectful<E, R>) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+  : <R2 extends R>(computation: Effectful<E, R2>) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R2>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R>)
   : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) | ((computation: Effectful<E, R>, ) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
-  if (!second) return computation => handle_<E, R, H>(computation, first as H)
+  if (!second) return <R2 extends R>(computation: Effectful<E, R2>) => handle_<E, R2, H>(computation, first as H)
   else if (isGenerator(first)) return handle_<E, R, H>(first, second as H)
   else return handle_<E, R, H>(second as Effectful<E, R>, first)
 }
