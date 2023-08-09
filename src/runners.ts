@@ -39,7 +39,7 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
         // @ts-ignore-next-line
         if (typeof handlers[effectName][constructorName] !== 'function')
           // @ts-ignore-next-line
-          resolve(unsafeAsyncRunner(comp, handlers[action.effectName][action.constructorName]))
+          resolve(unsafeAsyncRunner(comp, handlers[effectName][constructorName]))
         //@ts-ignore-next-line
         else handlers[effectName][constructorName](
           // @ts-ignore-next-line
