@@ -45,8 +45,15 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
           // @ts-ignore-next-line
           ...parameters,
           // @ts-ignore-next-line
-          value => {
-            resolve(unsafeAsyncRunner(comp, value))
+          {
+            // @ts-ignore-next-line
+            resume(value) {
+              resolve(unsafeRunAsync(comp, value))
+            },
+            // @ts-ignore-next-line
+            abort(value) {
+              resolve(value)
+            }
           })
       else reject(new HandlerError(thrown.value, 'Unhandled Action found'))
     })
