@@ -6,7 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./runners": "./src/runners.ts",
-    "./helper": "./src/helper.ts"
+    "./assistant": "./src/assistant.ts"
   },
   "sideEffects": false,
   "scripts": {
