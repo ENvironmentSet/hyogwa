@@ -9,7 +9,8 @@
     "./assistant": "./src/assistant.ts",
     "./exception": "./src/exception.ts",
     "./env": "./src/env.ts",
-    "./state": "./src/state.ts"
+    "./state": "./src/state.ts",
+    "./log": "./src/log.ts"
   },
   "sideEffects": false,
   "scripts": {
