@@ -63,4 +63,3 @@ export type InspectEffectHandling<C extends Effectful<Spec, unknown>, H> =
             : never
           : never
     : Suggestion<'Fail to extract effect specifications or result type from the given effectful computation'>
-
