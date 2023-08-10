@@ -9,7 +9,7 @@ const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
  *
  * (second one is possible thanks to subtype polymorphism)
  */
-export interface Spec<out N extends string = string> {
+export interface Spec<N extends string = string> {
   [EFFECT_NAME]: N
 }
 
@@ -56,7 +56,7 @@ type ActionsFromSpecs<S extends Spec>
  * 1. May yield arbitrary number of actions.
  * 2. Must return computation result of type 'R' as return value.
  */
-export interface Effectful<in out S extends Spec, out R> extends Generator<ActionsFromSpecs<S>, R> {
+export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs<S>, R> {
   [Symbol.iterator](): Effectful<S, R>
 }
 
@@ -114,13 +114,18 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
  *  'ER' for type of value which will be passed to original context
  *  'R' for type of value which will be used as result of 'handle' call
  */
-export interface HandleTactics<in ER, in R = never> {
+interface HandleTactics<in ER, in R> {
   resume(value: ER): void
   abort(value: R): void
 }
 
 /**
  * Produce handler type definition for given effect(specification)
+ *
+ * Type parameter 'R' is type of effect handle's result(note that this is not type of action handle's result)
+ *
+ * WARNING: This type must be used with 'satisfy' operator or used as constraint on type variable.
+ * Do not directly annotate handlers as this type.
  */
 type HandlerFromSpec<S extends Spec, R> = {
   [K in PickActionNames<S>]:
@@ -133,7 +138,8 @@ type HandlerFromSpec<S extends Spec, R> = {
  * ref: 'handle' function
  */
 
-export type HandlersFromSpecs<S extends Spec, R>
+/** HandlerFromSpec iterating over union of specs */
+type HandlersFromSpecs<S extends Spec, R>
   = UnionToIntersection<
   S extends infer S_ ?
     S_ extends Spec ?
@@ -142,8 +148,15 @@ export type HandlersFromSpecs<S extends Spec, R>
     : never
 >
 
-type PartialHandlersFromSpecs<S extends Spec, R>
-  = Partial<HandlersFromSpecs<S, R>>
+/**
+ * Produce handler type definition for given effect(specification)
+ *
+ * Type parameter 'R' is type of effect handle's result(note that this is not type of action handle's result)
+ *
+ * WARNING: This type must be used with 'satisfy' operator or used as constraint on type variable.
+ * Do not directly annotate handlers as this type.
+ */
+export type Handlers<S extends Spec, R = never> = HandlersFromSpecs<S, R>
 
 /**
  * Collects used effects from given handler(type)
@@ -171,7 +184,7 @@ export class HandleError extends Error {
   }
 }
 
-function* _handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
+function* _handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
   let thrown = computation.next()
@@ -238,13 +251,13 @@ function* _handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(c
  *
  * To find actual implementation, see 'handle_' function.
  */
-export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(computation: Effectful<E, R>, handlers: H)
+export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
+export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: Effectful<E, R>)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: () => Effectful<E, R>)
+export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: () => Effectful<E, R>)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R> | (() => Effectful<E, R>))
+export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R> | (() => Effectful<E, R>))
   : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
   if (Symbol.iterator in first) return _handle<E, R, H>(first, second as H)
   else if (typeof second === 'function') return _handle<E, R, H>(second(), first)
