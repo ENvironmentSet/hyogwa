@@ -163,7 +163,7 @@ type CollectEffectsFromHandlers<H>
         : never
       : never
 
-export class HandlerError extends Error {
+export class HandleError extends Error {
   constructor(action: Action<string, string, unknown[]>, reason: string) {
     super(`
       Fail to handle action '${action.effectName}.${action.constructorName}'
@@ -226,7 +226,7 @@ function* _handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(c
   }
 
   if (!isPreviousEffectResolved)
-    throw new HandlerError(thrown.value as Action<string, string, unknown[]>, 'Effect handlers must call handle tactics')
+    throw new HandleError(thrown.value as Action<string, string, unknown[]>, 'Effect handlers must call handle tactics')
 
   return aborted ? abortedValue! : thrown.value
 }
