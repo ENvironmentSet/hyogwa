@@ -27,6 +27,9 @@ interface Action<EN, CN, P> {
 
 type PickActionNames<S extends Spec> = Exclude<keyof S, typeof EFFECT_NAME>
 
+/**
+ * Produce action types from given effect(specification)
+ */
 type ActionFromSpec<S extends Spec>
   = PickActionNames<S> extends infer K ?
       K extends keyof S ?
