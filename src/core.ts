@@ -1,6 +1,6 @@
 import { UnionToIntersection } from './utils'
 
-const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
+export const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
 
 /**
  * This type has two different meaning:
@@ -161,7 +161,7 @@ export type Handlers<S extends Spec, R = never> = HandlersFromSpecs<S, R>
 /**
  * Collects used effects from given handler(type)
  */
-type CollectEffectsFromHandlers<H>
+export type CollectEffectsFromHandlers<H>
   = keyof H extends infer K1 ?
       K1 extends keyof H ?
         keyof H[K1] extends infer K2 ?
