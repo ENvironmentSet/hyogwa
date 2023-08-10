@@ -1,4 +1,4 @@
-import { UnionToIntersection } from './UnionToIntersection'
+import { UnionToIntersection } from './utils'
 
 const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
 
