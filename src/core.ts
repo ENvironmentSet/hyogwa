@@ -104,7 +104,17 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
 }
 //@TODO: make this function only require spec of new effect
 
-interface HandleTactics<ER, R> {
+/**
+ * Interface for handle tactics
+ *
+ * Parameterized by type of the effect evaluation result('ER') and type of the handle abortion value('R')
+ * if 'abort' is never used in actual implementation, you may pass 'never' as 'R'.
+ *
+ * short description:
+ *  'ER' for type of value which will be passed to original context
+ *  'R' for type of value which will be used as result of 'handle' call
+ */
+export interface HandleTactics<ER, R = never> {
   resume(value: ER): void
   abort(value: R): void
 }

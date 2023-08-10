@@ -1,1 +1,1 @@
-export { Spec, createEffect, Effectful, handle } from './core'
+export { Spec, createEffect, Effectful, handle, HandleTactics } from './core'
