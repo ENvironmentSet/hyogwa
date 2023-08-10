@@ -9,7 +9,7 @@ const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
  *
  * (second one is possible thanks to subtype polymorphism)
  */
-export interface Spec<N extends string = string> {
+export interface Spec<out N extends string = string> {
   [EFFECT_NAME]: N
 }
 
@@ -56,7 +56,7 @@ type ActionsFromSpecs<S extends Spec>
  * 1. May yield arbitrary number of actions.
  * 2. Must return computation result of type 'R' as return value.
  */
-export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs<S>, R> {
+export interface Effectful<in out S extends Spec, out R> extends Generator<ActionsFromSpecs<S>, R> {
   [Symbol.iterator](): Effectful<S, R>
 }
 
@@ -114,7 +114,7 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
  *  'ER' for type of value which will be passed to original context
  *  'R' for type of value which will be used as result of 'handle' call
  */
-export interface HandleTactics<ER, R = never> {
+export interface HandleTactics<in ER, in R = never> {
   resume(value: ER): void
   abort(value: R): void
 }
