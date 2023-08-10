@@ -6,30 +6,30 @@ export type InspectEffectfulFunction<G extends (...args: never) => Generator> =
  G extends (...args: never) => Generator<infer AS, infer R> ?
     [AS] extends [Action<string, string, unknown[]>] ?
       Suggestion<
-        'We have inferred effects used in the function and return type of the function. Consider typing the function properly with this information.',
+        'Effects used in the function and return type of the function is inferred as following. Consider typing the function properly with this information.',
         {
-          'name of effects used in the function': AS extends Action<infer N, string, unknown[]> ? N : never
+          'names of effect used in the function': AS extends Action<infer N, string, unknown[]> ? N : never
           'return type of the function': R
         }
       >
       : Suggestion<
-        'Effectful functions must be generator functions which only yields actions(effectful terms) but found value of this type can be yield in the given function',
+        'Effectful functions must be generator functions which only yield actions but the given function yields non-action value.',
         {
-          'non action type': Exclude<AS, Action<string, string, unknown[]>>
+          'types of non-action value': Exclude<AS, Action<string, string, unknown[]>>
         }
       >
-    : Suggestion<'Fail to extract type level information of given function'>
+    : Suggestion<'Fail to extract type information from the given function.'>
 
 export type InspectEffectHandling<C extends Effectful<Spec, unknown>, H> =
   C extends Effectful<infer SS, infer R> ?
     string extends (SS extends Spec<infer N> ? N : never) ?
-      Suggestion<'Malformed spec is found, every specs must have their name as string literal type. But spec of given computation has \'string\' type as its name'>
+      Suggestion<'Malformed effect specification is found. '>
       : H extends Partial<Handlers<SS, R>> ?
         Suggestion<
-          'We have inspected handling of the computation via the given handler',
+          'With the given handler, the computation can be handled while resulting following:',
           {
-            'effects resolved by handling': keyof H
-            'effects remain after handling': Exclude<SS, { [EFFECT_NAME]: keyof H }> |  CollectEffectsFromHandlers<H>
+            'effects will be resolved by handling': keyof H
+            'effects will remain after handling': Exclude<SS, { [EFFECT_NAME]: keyof H }> |  CollectEffectsFromHandlers<H>
             'result of handling': R
           }
         >
@@ -43,10 +43,10 @@ export type InspectEffectHandling<C extends Effectful<Spec, unknown>, H> =
                       H[EN][AN] extends OH[EN][AN] ?
                         never
                         : Suggestion<
-                          'Type mismatch found in action handler',
+                          'Type of action handler possibly wrong',
                           {
-                            'we expected action handler to be(or subtype of this)': OH[EN][AN]
-                            'but we got': H[EN][AN]
+                            'expected type': OH[EN][AN]
+                            'given type': H[EN][AN]
                           }
                         >
                       : Suggestion<
@@ -62,4 +62,4 @@ export type InspectEffectHandling<C extends Effectful<Spec, unknown>, H> =
               : never
             : never
           : never
-    : Suggestion<'Fail to extract effect specifications or result type from the given effectful computation'>
+    : Suggestion<'Fail to extract effect specifications or result type from the given effectful computation.'>
