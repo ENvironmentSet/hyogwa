@@ -242,11 +242,8 @@ export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, 
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H, computation: Effectful<E, R>)
   : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(handlers: H)
-  : <R2 extends R>(computation: Effectful<E, R2>) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R2>
 export function handle<E extends Spec, R, H extends PartialHandlersFromSpecs<E, R>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R>)
-  : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) | ((computation: Effectful<E, R>, ) => Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
-  if (!second) return <R2 extends R>(computation: Effectful<E, R2>) => _handle<E, R2, H>(computation, first as H)
-  else if (Symbol.iterator in first) return _handle<E, R, H>(first, second as H)
+  : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
+  if (Symbol.iterator in first) return _handle<E, R, H>(first, second as H)
   else return _handle<E, R, H>(second as Effectful<E, R>, first)
 }
