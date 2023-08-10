@@ -8,7 +8,8 @@
     "./runners": "./src/runners.ts",
     "./assistant": "./src/assistant.ts",
     "./exception": "./src/exception.ts",
-    "./env": "./src/env.ts"
+    "./env": "./src/env.ts",
+    "./state": "./src/state.ts"
   },
   "sideEffects": false,
   "scripts": {
