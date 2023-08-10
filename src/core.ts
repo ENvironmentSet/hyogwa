@@ -19,7 +19,7 @@ export interface Spec<N extends string = string> {
  * Parameterized by name of the effect where the action belongs('EN'), name of the action constructor('CN')
  * and type of parameters the action requires('P')
  */
-interface Action<EN, CN, P> {
+export interface Action<EN, CN, P> {
   effectName: EN
   constructorName: CN
   parameters: P
