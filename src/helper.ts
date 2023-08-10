@@ -8,9 +8,7 @@ export type InspectEffectfulFunction<G extends (...args: never) => Generator> =
       Suggestion<
         'We have inferred effects used in the function and return type of the function. Consider typing the function properly with this information.',
         {
-          'name of effects used in the function': AS extends infer A extends Action<string, string, unknown[]> ?
-            A['effectName']
-            : never
+          'name of effects used in the function': AS extends Action<infer N, string, unknown[]> ? N : never
           'return type of the function': R
         }
       >
