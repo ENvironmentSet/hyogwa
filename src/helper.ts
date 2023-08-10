@@ -1,10 +1,10 @@
 import { Action } from './core'
 
-type Suggestion<M extends string, T> = M & T
+type Suggestion<M extends string, T = string> = M & T
 
-export type InspectEffectfulFunction<G extends GeneratorFunction> =
+export type InspectEffectfulFunction<G extends (...args: never) => Generator> =
  G extends (...args: never) => Generator<infer AS, infer R> ?
-    AS extends Action<string, string, unknown[]> ?
+    [AS] extends [Action<string, string, unknown[]>] ?
       Suggestion<
         'We have inferred effects used in the function and return type of the function. Consider typing the function properly with this information.',
         {
@@ -20,4 +20,4 @@ export type InspectEffectfulFunction<G extends GeneratorFunction> =
           'non action type': Exclude<AS, Action<string, string, unknown[]>>
         }
       >
-    : 'Fail to extract type level information of given function'
+    : Suggestion<'Fail to extract type level information of given function'>
