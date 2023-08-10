@@ -166,8 +166,7 @@ type CollectEffectsFromHandlers<H>
 export class HandleError extends Error {
   constructor(action: Action<string, string, unknown[]>, reason: string) {
     super(`
-      Fail to handle action '${action.effectName}.${action.constructorName}'
-      ${reason}
+      Fail to handle action '${action.effectName}.${action.constructorName}'\n${reason}
     `.trim());
   }
 }
