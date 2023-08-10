@@ -1,4 +1,4 @@
-import { Effectful, handle, Spec, Handlers } from './core';
+import { Effectful, handle, Spec, Handlers, HandleError } from './core';
 
 /**
  * runs any pure computation
@@ -40,21 +40,29 @@ export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handler
         if (typeof handlers[effectName][constructorName] !== 'function')
           // @ts-ignore-next-line
           resolve(unsafeAsyncRunner(comp, handlers[effectName][constructorName]))
-        //@ts-ignore-next-line
-        else handlers[effectName][constructorName](
-          // @ts-ignore-next-line
-          ...parameters,
-          // @ts-ignore-next-line
-          {
+        else {
+          let tacticIsCalled = false
+
+          //@ts-ignore-next-line
+          handlers[effectName][constructorName](
             // @ts-ignore-next-line
-            resume(value) {
-              resolve(unsafeAsyncRunner(comp, value))
-            },
+            ...parameters,
             // @ts-ignore-next-line
-            abort(value) {
-              resolve(value)
-            }
-          })
+            {
+              // @ts-ignore-next-line
+              resume(value) {
+                if (tacticIsCalled) throw new HandleError(thrown.value, 'cannot call handle tactics more than once')
+                tacticIsCalled = true
+                resolve(unsafeAsyncRunner(comp, value))
+              },
+              // @ts-ignore-next-line
+              abort(value) {
+                if (tacticIsCalled) throw new HandleError(thrown.value, 'cannot call handle tactics more than once')
+                tacticIsCalled = true
+                resolve(value)
+              }
+            })
+        }
     })
   }
 

@@ -213,11 +213,13 @@ function* _handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computat
           {
             // @ts-ignore-next-line
             resume(value) {
+              if (isPreviousEffectResolved) throw new HandleError(action, 'cannot call handle tactics more than once')
               thrown = computation.next(value)
               isPreviousEffectResolved = true
             },
             // @ts-ignore-next-line
             abort(value) {
+              if (isPreviousEffectResolved) throw new HandleError(action, 'cannot call handle tactics more than once')
               // mark effect handling process is aborted and save return value
               abortedValue = value
               isPreviousEffectResolved = true
