@@ -184,9 +184,11 @@ export class HandleError extends Error {
   }
 }
 
+type ExcludeHandledEffects<S, H> = Exclude<S, { [EFFECT_NAME]: keyof H }>
+
 function* _handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
 // those were type of parameters, following is return type
-  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R> {
+  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R> {
   let thrown = computation.next()
   let isPreviousEffectResolved = true
   let aborted = false
@@ -254,11 +256,11 @@ function* _handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computat
  * To find actual implementation, see 'handle_' function.
  */
 export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
-  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: Effectful<E, R>)
-  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: () => Effectful<E, R>)
-  : Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>
+  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R> | (() => Effectful<E, R>))
   : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
   if (Symbol.iterator in first) return _handle<E, R, H>(first, second as H)
