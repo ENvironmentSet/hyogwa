@@ -63,7 +63,7 @@ Before start, here's the summary:
 
 - 🌿 Natural interface: No more suspicious wrapper functions, or cumbersome utilities; Write codes as you write **plain typescript code**.
 - 🏃 Write once, runs everywhere: You can perfectly **decouple business logics** from platform specific logics.
-- 🧑‍💻 Advanced development experience: **Built-in coding assistant** is ready for you; it works without extra configuration.
+- 🧑‍💻 Advanced development experience: **Built-in coding assistant** ready for you; it works without extra configuration.
 - ⏳ Minimal interface: You can start writing code right after only learning **three functions** and **two types**.
 - 🗽 Platform independence: You can use hyogwa in everywhere; hyogwa has **zero dependency**.
 
