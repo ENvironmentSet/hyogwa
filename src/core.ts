@@ -62,13 +62,15 @@ export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs
  * Takes an effect spec and returns actual representation of that effect
  */
 type Effect<S extends Spec> = {
-  [K in PickActionNames<S>]: S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
+  [K in PickActionNames<S>]:
+    S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
 }
 
 /**
  * Type utility for deriving new effect from another
  */
-export type Derive<N extends string, S extends Spec> = Omit<S, typeof EFFECT_NAME> & { [EFFECT_NAME]: `${N}` }
+export type Derive<N extends string, S extends Spec>
+  = Omit<S, typeof EFFECT_NAME> & { [EFFECT_NAME]: `${N}` }
 
 /**
  * Effect constructor
@@ -82,7 +84,7 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
     get(_, constructorName) {
       // Action creator for function effects
       //@ts-ignore-next-line
-      const result = function* (...parameters) {
+      const actionCreator = function* (...parameters) {
         //@ts-ignore-next-line
         return yield { effectName, constructorName, parameters }
       }
@@ -94,7 +96,7 @@ export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]):
         return yield { effectName, constructorName }
       }
 
-      return result
+      return actionCreator
     }
   }) as Effect<S>
 }
@@ -137,10 +139,10 @@ type HandlerFromSpec<S extends Spec, R> = {
 /** HandlerFromSpec iterating over union of specs */
 type HandlersFromSpecs<S extends Spec, R>
   = UnionToIntersection<
-  S extends infer S_ extends Spec ?
-    { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S, R> }
-    : never
->
+      S extends infer S_ extends Spec ?
+        { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S, R> }
+        : never
+    >
 
 /**
  * Produce handler type definition for given effect(specification)
@@ -165,8 +167,6 @@ export type CollectEffectsFromHandlers<H>
             : never
         : never
     : never
-
-
 
 export class HandleError extends Error {
   constructor(action: Action<string, string, unknown[]>, reason: string) {
@@ -258,11 +258,11 @@ export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(com
   : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
 export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: () => Effectful<E, R>)
+export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, block: () => Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R> | (() => Effectful<E, R>))
+export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(first: Effectful<E, R> | H, second: H | Effectful<E, R> | (() => Effectful<E, R>))
   : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
   if (Symbol.iterator in first) return _handle<E, R, H>(first, second as H)
-  else if (typeof second === 'function') return _handle<E, R, H>(second(), first)
-  else return _handle<E, R, H>(second as Effectful<E, R>, first)
+  else if (Symbol.iterator in second) return _handle<E, R, H>(second, first)
+  else return _handle<E, R, H>((second as () => Effectful<E, R>)(), first)
 }
