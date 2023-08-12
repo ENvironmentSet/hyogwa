@@ -168,6 +168,9 @@ type PureHandlersFromSpecs<S extends Spec, R>
     : never
 >
 
+/**
+ * 'Handlers' but not allows action handlers to be effectful
+ */
 export type PureHandlers<S extends Spec, R = never> = PureHandlersFromSpecs<S, R>
 
 /**
