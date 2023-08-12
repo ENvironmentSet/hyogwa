@@ -204,7 +204,14 @@ function* _handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computat
       // @ts-ignore-next-line
       if (typeof handlers[action.effectName][action.constructorName] !== 'function') {
         // @ts-ignore-next-line
-        thrown = computation.next(handlers[action.effectName][action.constructorName])
+        const maybeComputation = handlers[action.effectName][action.constructorName]
+
+        if (typeof maybeComputation?.[Symbol.iterator] === 'function')
+          // @ts-ignore-next-line
+          thrown = computation.next(yield* maybeComputation)
+        else
+          // @ts-ignore-next-line
+          thrown = computation.next(handlers[action.effectName][action.constructorName])
         isPreviousEffectResolved = true
       } else {
         // handle operational effects
