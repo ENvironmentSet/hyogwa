@@ -1,4 +1,4 @@
-import { Effectful, handle, Spec, Handlers, HandleError } from './core';
+import { Effectful, handle, Spec, PureHandlers, HandleError } from './core';
 
 /**
  * runs any pure computation
@@ -11,10 +11,9 @@ export function run<R>(comp: Effectful<never, R>): R {
  * Given any effectful computation and handlers that resolves every possible effects of that computation,
  * run the computation synchronously.
  *
- * NOTE: handlers must not produce new (hyogwa) effects since it's not possible to set more handlers after this function
- * NOTE: this is UNSAFE since it doesn't check whether given handlers are valid or not
+ * NOTE: this is UNSAFE since it doesn't check whether given handlers are semantically valid or not
  */
-export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers: Handlers<E, R>): R {
+export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers: PureHandlers<E, R>): R {
   return run(handle(comp, handlers))
 }
 
@@ -22,10 +21,9 @@ export function unsafeRunSync<E extends Spec, R>(comp: Effectful<E, R>, handlers
  * Given any effectful computation and handlers that resolves every possible effects of that computation,
  * run the computation asynchronously. Handlers given to this function are allowed to call 'resume' any time.
  *
- * NOTE: handlers must not produce new (hyogwa) effects since it's not possible to set more handlers after this function
- * NOTE: this is UNSAFE since it doesn't check whether given handlers are valid or not
+ * NOTE: this is UNSAFE since it doesn't check whether given handlers are semantically valid or not
  */
-export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handlers: Handlers<E, R>): Promise<R> {
+export function unsafeRunAsync<E extends Spec, R>(comp: Effectful<E, R>, handlers: PureHandlers<E, R>): Promise<R> {
   function unsafeAsyncRunner(comp: Effectful<E, R>, nextVal: unknown): Promise<R> {
     return new Promise((resolve) => {
       const thrown = comp.next(nextVal)

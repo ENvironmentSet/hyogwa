@@ -154,6 +154,22 @@ type HandlersFromSpecs<S extends Spec, R>
  */
 export type Handlers<S extends Spec, R = never> = HandlersFromSpecs<S, R>
 
+type PureHandlerFromSpec<S extends Spec, R> = {
+  [K in PickActionNames<S>]:
+  S[K] extends (...args: infer P) => infer ER ?
+    (...args: [...P, HandleTactics<ER, R>]) => void
+    : S[K]
+}
+
+type PureHandlersFromSpecs<S extends Spec, R>
+  = UnionToIntersection<
+  S extends infer S_ extends Spec ?
+    { [K in S_[typeof EFFECT_NAME]]: PureHandlerFromSpec<S, R> }
+    : never
+>
+
+export type PureHandlers<S extends Spec, R = never> = PureHandlersFromSpecs<S, R>
+
 /**
  * Collects used effects from given handler(type)
  */
