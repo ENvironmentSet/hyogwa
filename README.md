@@ -4,7 +4,7 @@
 import { Spec, createEffect, Effectful } from 'hyogwa';
 import { unsafeRunSync } from 'hyogwa/runners';
 
-// Definition of IO Effect
+// Definition of the IO Effect
 
 interface IO extends Spec<'IO'> {
   read(): string
@@ -12,7 +12,7 @@ interface IO extends Spec<'IO'> {
 }
 const IO = createEffect<IO>('IO')
 
-// Definition of main function with IO effect
+// Definition of the main function with IO effect
 
 function* main(): Effectful<IO, void> {
   const name = yield* IO.read()
@@ -20,7 +20,7 @@ function* main(): Effectful<IO, void> {
   yield* IO.write(`Welcome to hyogwa, ${name}!`)
 }
 
-// Running main function
+// Running the main function
 
 unsafeRunSync(main(), {
   IO: {
