@@ -31,18 +31,14 @@ type PickActionNames<S extends Spec> = Exclude<keyof S, typeof EFFECT_NAME>
  * Produce action types from given effect(specification)
  */
 type ActionFromSpec<S extends Spec>
-  = PickActionNames<S> extends infer K ?
-      K extends keyof S ?
-        Action<S[typeof EFFECT_NAME], K, S[K] extends (...args: infer P) => unknown ? P : never>
-        : never
+  = PickActionNames<S> extends infer K extends keyof S ?
+      Action<S[typeof EFFECT_NAME], K, S[K] extends (...args: infer P) => unknown ? P : never>
       : never
 
 /** ActionFromSpec iterating over union of specs */
 type ActionsFromSpecs<S extends Spec>
-  = S extends infer S_ ?
-      S_ extends Spec ?
+  = S extends infer S_ extends Spec ?
         ActionFromSpec<S_>
-        : never
       : never
 
 /**
@@ -141,10 +137,8 @@ type HandlerFromSpec<S extends Spec, R> = {
 /** HandlerFromSpec iterating over union of specs */
 type HandlersFromSpecs<S extends Spec, R>
   = UnionToIntersection<
-  S extends infer S_ ?
-    S_ extends Spec ?
-      { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S, R> }
-      : never
+  S extends infer S_ extends Spec ?
+    { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S, R> }
     : never
 >
 
@@ -162,19 +156,17 @@ export type Handlers<S extends Spec, R = never> = HandlersFromSpecs<S, R>
  * Collects used effects from given handler(type)
  */
 export type CollectEffectsFromHandlers<H>
-  = keyof H extends infer K1 ?
-      K1 extends keyof H ?
-        keyof H[K1] extends infer K2 ?
-          K2 extends keyof H[K1] ?
-            H[K1][K2] extends () => Effectful<infer E, unknown> ?
-              E
-              : H[K1][K2] extends Effectful<infer E, unknown> ?
-                  E
-                  : never
+  = keyof H extends infer K1 extends keyof H ?
+      keyof H[K1] extends infer K2 extends keyof H[K1] ?
+        H[K1][K2] extends () => Effectful<infer E, unknown> ?
+          E
+          : H[K1][K2] extends Effectful<infer E, unknown> ?
+            E
             : never
-          : never
         : never
-      : never
+    : never
+
+
 
 export class HandleError extends Error {
   constructor(action: Action<string, string, unknown[]>, reason: string) {
