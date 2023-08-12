@@ -50,7 +50,7 @@ evaluating assignment expression like `a = 1` results in not only some value but
 or the scope. If we regard shape of codes and evaluation result value of codes as extensional information(or in simple word, 'interface') of code,
 we can think the other information -- like "this code will make a log in the console" or "this code will change the value of variable" -- that rises from the code while evaluation
 intensional information(or in our well known term, 'side effects'). Those intensional information are matters as much as extensional information are since
-no single one can be easily ignored and we programmers should mind all of them just like they treat extensional information. 
+no single one can be easily ignored and we programmers should mind all of them just like we treat extensional information. 
 Our type system, however, only values extensional information and hardly check possible problems that may happen because of intensional information.
 All the burdens of inspecting, remembering, reasoning intensional information of code are passed to programmers.
 That's why we be always bothered by errors like 'undefined is not an object' and 'unhandled promise rejection'.
