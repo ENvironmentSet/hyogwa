@@ -23,7 +23,7 @@ export type InspectEffectfulFunction<G extends (...args: never) => Generator>
 export type InspectEffectHandling<C extends Effectful<Spec, unknown>, H>
   = C extends Effectful<infer SS, infer R> ?
       string extends (SS extends Spec<infer N> ? N : never) ?
-        Observation<'Malformed effect specification is found. '>
+        Observation<'Malformed effect specification is found.'>
         : H extends Partial<Handlers<SS, R>> ?
           Observation<
               'With the given handler, the computation can be handled while resulting following:',
