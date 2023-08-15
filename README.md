@@ -4,7 +4,7 @@
 import { Spec, createEffect, Effectful } from 'hyogwa/core';
 import { unsafeRunSync } from 'hyogwa/runners';
 
-// Defining IO effect
+// Defining own IO effect
 
 interface IO extends Spec<'IO'> {
   read(): string
