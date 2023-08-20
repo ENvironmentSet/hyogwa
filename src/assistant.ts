@@ -1,11 +1,26 @@
 import { Eq, Unreachable } from './utils';
 import { Effects, Handlers, NameOfEffect, ExcludeHandledEffects, UsedEffectsInHandlers } from './core';
 
+/**
+ * Type constructor constructing message representing type
+ * 
+ * @internal
+ *
+ * @typeParam M - A message
+ * @typeParam T - Additional information
+ */
 interface Suggestion<M extends string, T = never> {
   message: M
   additionalInformation: T
 }
 
+/**
+ * Inspects given effectful function
+ *
+ * @alpha
+ *
+ * @typeParam G - Type of effectful function to inspect
+ */
 export type InspectEffectfulFunction<G extends (...parameters: never) => Generator>
   = G extends (...parameters: never) => Generator<infer E, infer R> ?
       [E] extends [Effects] ?
@@ -24,6 +39,14 @@ export type InspectEffectfulFunction<G extends (...parameters: never) => Generat
         >
       : Unreachable
 
+/**
+ * Inspects handling given effectful computation with given handler at type level
+ *
+ * @alpha
+ *
+ * @typeParam C - Type of effectful computation to inspect
+ * @typeParam H - Type of handlers
+ */
 export type InspectEffectHandling<C extends Generator<Effects, unknown>, H>
   = C extends Generator<infer E extends Effects, infer R> ?
       Eq<E extends Effects ? NameOfEffect<E> : never, string> extends false ?
