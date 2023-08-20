@@ -60,6 +60,8 @@ export type InspectEffectfulFunction<G extends (...parameters: never) => Generat
  * - Find error in type of handlers
  * - Find missing part of handlers
  *
+ * NOTE: If this utility produces 'never' type, then type of your handler is possibly broken seriously.
+ *
  * @alpha
  *
  * @typeParam C - Type of effectful computation to inspect
