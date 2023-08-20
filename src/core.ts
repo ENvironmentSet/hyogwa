@@ -252,7 +252,7 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
   while (!raised.done && !aborted) {
     const code: E = raised.value
     const { construction, parameters } = code
-    const [scope, constructorName] = construction.split('.')
+    const [ scope, constructorName ] = construction.split('.')
     let isCodeHandled = false
 
     if (scope in handlers) {
