@@ -24,6 +24,17 @@ export interface Code<C extends string, P extends unknown[], T> { // Here, unkno
  *
  * @typeParam N - The name of the new effect (a string literal type is expected)
  * @typeParam S - The specification of the new effect
+ *
+ * @example Creating type representing IO effect
+ *
+ * ```typescript
+ * import { Effect } from 'hyogwa/core'
+ *
+ * type IO = Effect<'IO', {
+ *   read(): string
+ *   write(text: string): void
+ * }>
+ * ```
  */
 export type Effect<N extends string, S extends {}>
   = Delay<
@@ -44,6 +55,22 @@ export type Effect<N extends string, S extends {}>
  * Only for constraining type parameters, do not use this type to directly type something.
  *
  * @alpha
+ *
+ * @example Array#map for effectful functions
+ *
+ * ```typescript
+ * import { Effects, Effectful } from 'hyogwa/core'
+ *
+ * function* map<T, U, E extends Effects>(array: T[], f: (x: T) => Effectful<E, U>): Effectful<E, U[]> {
+ *   const result: U[] = []
+ *
+ *   for (const element of array) {
+ *     result.push(yield* f(element))
+ *   }
+ * }
+ *
+ * return result
+ * ```
  */
 export type Effects = Code<string, unknown[], unknown>
 
@@ -53,6 +80,8 @@ export type Effects = Code<string, unknown[], unknown>
  * With given effects 'E' and type of evaluation result value 'R',
  * constructs type of effectful computations that may produce arbitrary number of effects specified in type 'E'
  * and result in value of type 'R'
+ *
+ * NOTE: It's highly recommended to explicitly type every effectful function with this type.
  *
  * @alpha
  *
@@ -65,6 +94,14 @@ export type Effects = Code<string, unknown[], unknown>
  *
  * @typeParam E - Union of effect types that the computation may raise
  * @typeParam R - Type of evaluation result value
+ *
+ * @example
+ *
+ * ```
+ * function* myFunction(): Effectful<MyEffect, someReturnType> {
+ *   // code goes here
+ * }
+ * ```
  */
 export interface Effectful<E, R> extends Generator<E, R> {}
 
@@ -120,6 +157,19 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
  *
  * @param effectName - the name of given effect
  * @returns code constructors for given effect
+ *
+ * @example Defining IO Effect
+ *
+ * ```typescript
+ * import { Effect, createCodeConstructors } from 'hyogwa/core'
+ *
+ * type IO = Effect<'IO', {
+ *   read(): string
+ *   write(text: string): void
+ * }>
+ * const IO = createCodeConstructors<IO>('IO')
+ *
+ * ```
  */
 export function createCodeConstructors<E extends Effects>(effectName: NameOfEffect<E>): CodeConstructors<E> {
   return new Proxy({}, {
@@ -157,10 +207,21 @@ export interface HandleTactics<in ER, in R> {
 /**
  * Constructs type of value to handle given effects
  *
+ * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
+ * Do not use this type to directly type something.
+ *
  * @alpha
  *
  * @typeParam E - Effects to handle
  * @typeParam R - Result type of handling operation
+ *
+ * @example
+ *
+ * ```typescript
+ * const someHandlerForSomeEffect = {
+ *   // handler definition goes here
+ * } satisfies Handlers<SomeEffect>
+ * ```
  */
 export type Handlers<E extends Effects, R = never>
   = Simplify<
@@ -310,11 +371,47 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
 /**
  * Handles effects of given computation via given handlers
  *
+ * Handle functions must call handle tactics exactly once before they terminate.
+ * In addition, they must not have any implicit effects(effects weren't typed in their signature).
+ *
  * @alpha
  *
  * @param computation - Computation to resolve some effects
  * @param handlers - Handlers to handle some effects of given computation
  * @returns An effectful computation which effects that handled by 'H' are resolved
+ *
+ * @example Handling Exception
+ *
+ * ```typescript
+ * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
+ * import { Exception } from 'hyogwa/exception'
+ *
+ * type DivideByZero = Effect<'DivideByZero', Exception<void>>
+ * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
+ *
+ * function* div(x, y): Effectful<DivideByZero, number> {
+ *   if (y === 0) yield* DivideByZero.raise()
+ *
+ *   return x / y
+ * }
+ *
+ * function main(): Effectful<never, number> {
+ *   const result = yield* handle(
+ *     div(1, 0),
+ *     {
+ *       DivideByZero: {
+ *         raise(_, { abort }) {
+ *           abort(NaN)
+ *         }
+ *       }
+ *     }
+ *   )
+ *
+ *   return result
+ * }
+ *
+ * run(main())
+ * ```
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (computation: Generator<E, R>, handlers: H)
@@ -322,11 +419,47 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
 /**
  * Handles effects of given computation via given handlers
  *
+ * Handle functions must call handle tactics exactly once before they terminate.
+ * In addition, they must not have any implicit effects(effects weren't typed in their signature).
+ *
  * @alpha
  *
  * @param handlers - Handlers to handle some effects of given computation
  * @param computation - Computation to resolve some effects
  * @returns An effectful computation which effects that handled by 'H' are resolved
+ *
+ * @example Handling Exception
+ *
+ * ```typescript
+ * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
+ * import { Exception } from 'hyogwa/exception'
+ *
+ * type DivideByZero = Effect<'DivideByZero', Exception<void>>
+ * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
+ *
+ * function* div(x, y): Effectful<DivideByZero, number> {
+ *   if (y === 0) yield* DivideByZero.raise()
+ *
+ *   return x / y
+ * }
+ *
+ * function main(): Effectful<never, number> {
+ *   const result = yield* handle(
+ *     div(1, 0),
+ *     {
+ *       DivideByZero: {
+ *         raise(_, { abort }) {
+ *           abort(NaN)
+ *         }
+ *       }
+ *     }
+ *   )
+ *
+ *   return result
+ * }
+ *
+ * run(main())
+ * ```
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (handlers: H, computation: Generator<E, R>)
@@ -334,11 +467,47 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
 /**
  * Handles effects of given block via given handlers
  *
+ * Handle functions must call handle tactics exactly once before they terminate.
+ * In addition, they must not have any implicit effects(effects weren't typed in their signature).
+ *
  * @alpha
  *
  * @param handlers - Handlers to handle some effects of given computation
  * @param block - Function with no parameters, resulting effectful computation
  * @returns An effectful computation which effects that handled by 'H' are resolved
+ *
+ * @example Handling Exception
+ *
+ * ```typescript
+ * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
+ * import { Exception } from 'hyogwa/exception'
+ *
+ * type DivideByZero = Effect<'DivideByZero', Exception<void>>
+ * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
+ *
+ * function* div(x, y): Effectful<DivideByZero, number> {
+ *   if (y === 0) yield* DivideByZero.raise()
+ *
+ *   return x / y
+ * }
+ *
+ * function main(): Effectful<never, number> {
+ *   const result = yield* handle(
+ *     div(1, 0),
+ *     {
+ *       DivideByZero: {
+ *         raise(_, { abort }) {
+ *           abort(NaN)
+ *         }
+ *       }
+ *     }
+ *   )
+ *
+ *   return result
+ * }
+ *
+ * run(main())
+ * ```
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (handlers: H, block: () => Generator<E, R>)
@@ -356,6 +525,12 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  *
  * @param computation - A pure computation to run
  * @returns The result of evaluating given computation
+ *
+ * @example
+ *
+ * ```typescript
+ * run(pureComputationToRun)
+ * ```
  */
 export function run<R>(computation: Generator<never, R>): R {
   return computation.next().value

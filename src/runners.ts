@@ -25,6 +25,12 @@ type ToplevelHandlers<E extends Effects, R = never>
  *
  * @param computation - A computation to evaluate
  * @param handlers - Handlers to handle whole effect of given computation
+ *
+ * @example
+ *
+ * ```typescript
+ * unsafeRunSync(computationToRun, handlers)
+ * ```
  */
 export function unsafeRunSync<E extends Effects, R>(computation: Generator<E, R>, handlers: ToplevelHandlers<E, R>): R {
   //@ts-ignore-next-line
@@ -34,8 +40,16 @@ export function unsafeRunSync<E extends Effects, R>(computation: Generator<E, R>
 /**
  * Runs given computation asynchronously
  *
+ * Handlers passed to this function can call handle tactics asynchronously.
+ *
  * @param computation - A computation to evaluate
  * @param handlers - Handlers to handle whole effect of given computation
+ *
+ * @example
+ *
+ * ```typescript
+ * unsafeRunAsync(computationToRun, handlers)
+ * ```
  */
 export function unsafeRunAsync<E extends Effects, R>(computation: Generator<E, R>, handlers: ToplevelHandlers<E, R>): Promise<R> {
   function unsafeAsyncRunner(resumeValue: unknown): Promise<R> {

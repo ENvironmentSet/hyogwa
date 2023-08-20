@@ -1,7 +1,7 @@
 {
   "name": "hyogwa",
   "version": "0.0.0-beta.0",
-  "description": "Natural \uD83C\uDF3F effect system that fits TypeScript",
+  "description": "Natural 🌿 effect system that fits TypeScript",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -16,7 +16,8 @@
   "sideEffects": false,
   "scripts": {
     "typecheck": "tsc",
-    "prepare": "npm run typecheck"
+    "generate-docs": "typedoc",
+    "prepare": "npm run typecheck; npm run generate-docs"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
   },
   "homepage": "https://github.com/ENvironmentSet/hyogwa#readme",
   "devDependencies": {
+    "typedoc": "^0.24.8",
     "typescript": "^5.1.6"
   }
 }
