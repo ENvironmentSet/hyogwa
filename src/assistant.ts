@@ -3,7 +3,7 @@ import { Effects, Handlers, NameOfEffect, ExcludeHandledEffects, UsedEffectsInHa
 
 /**
  * Type constructor constructing message representing type
- * 
+ *
  * @internal
  *
  * @typeParam M - A message
@@ -17,9 +17,22 @@ interface Suggestion<M extends string, T = never> {
 /**
  * Inspects given effectful function
  *
+ * What this utility can do:
+ * - Inferences effects used in the function
+ * - Inferences result type of the function
+ * - Check whether the function is valid effectful function
+ *
  * @alpha
  *
  * @typeParam G - Type of effectful function to inspect
+ *
+ * @example
+ *
+ * Save inspection result in the form of type alias, view it via IDE extension
+ * or using typescript compiler by making error about it deliberately.
+ * ```typescript
+ * type Inspection = InspectEffectfulFunction<typeof functionToInspect>
+ * ```
  */
 export type InspectEffectfulFunction<G extends (...parameters: never) => Generator>
   = G extends (...parameters: never) => Generator<infer E, infer R> ?
@@ -40,12 +53,25 @@ export type InspectEffectfulFunction<G extends (...parameters: never) => Generat
       : Unreachable
 
 /**
- * Inspects handling given effectful computation with given handler at type level
+ * Inspects handling given effectful computation with given handlers at type level
+ *
+ * What this utility can do:
+ * - Predict result of handling the computation with the handlers
+ * - Find error in type of handlers
+ * - Find missing part of handlers
  *
  * @alpha
  *
  * @typeParam C - Type of effectful computation to inspect
  * @typeParam H - Type of handlers
+ *
+ * @example
+ *
+ * Save inspection result in the form of type alias, view it via IDE extension
+ * or using typescript compiler by making error about it deliberately.
+ * ```typescript
+ * type Inspection = InspectEffectHandling<typeof computationToHandle, typeof handlerToUse>
+ * ```
  */
 export type InspectEffectHandling<C extends Generator<Effects, unknown>, H>
   = C extends Generator<infer E extends Effects, infer R> ?
