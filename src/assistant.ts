@@ -12,7 +12,7 @@ export type InspectEffectfulFunction<G extends (...parameters: never) => Generat
         Suggestion<
           'Effects used in the function and return type of the function is inferred as following.',
           {
-            'names of effect used in the function': E extends infer E_ extends Effects ? NameOfEffect<E_> : never
+            'names of effect used in the function': E extends Effects ? NameOfEffect<E> : never
             'return type of the function': R
           }
         >
