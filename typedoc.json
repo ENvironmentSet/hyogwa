@@ -1,0 +1,13 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./src/core.ts",
+    "./src/runners.ts",
+    "./src/assistant.ts",
+    "./src/state.ts",
+    "./src/env.ts",
+    "./src/log.ts",
+    "./src/exception.ts"
+  ],
+  "excludeInternal": true
+}
