@@ -39,7 +39,7 @@ unsafeRunSync(main(), {
 No more suspicious wrapper functions, No more mess with pipelines, No more scary types. 
 Just plain typescript functions, and plain typescript functions only.
 
-> **⚠️ CAUTION**: This project is work-in-progress. APIs are prone to change. Use at your own risk!
+> **⚠️ CAUTION**: This project is work-in-progress. API is prone to change. Use at your own risk!
 
 ## Why hyogwa?
 
