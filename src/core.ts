@@ -342,7 +342,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
 /**
  * Runs a pure computation
  *
- * @param computation: A pure computation to run
+ * @param computation - A pure computation to run
  * @returns The result of evaluating given computation
  */
 export function run<R>(computation: Generator<never, R>): R {
