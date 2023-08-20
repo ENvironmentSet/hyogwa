@@ -3,6 +3,14 @@ import { Eq, Simplify } from './utils';
 
 export { run } from './core'
 
+/**
+ * Constructs type for handlers used at top level
+ *
+ * @internal
+ *
+ * @typeParam E - Effects to handle
+ * @typeParam R - Result type of handling operation
+ */
 type ToplevelHandlers<E extends Effects, R = never>
   = Simplify<
   E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
@@ -12,11 +20,23 @@ type ToplevelHandlers<E extends Effects, R = never>
     : never
 >
 
+/**
+ * Runs given computation synchronously
+ *
+ * @param computation - A computation to evaluate
+ * @param handlers - Handlers to handle whole effect of given computation
+ */
 export function unsafeRunSync<E extends Effects, R>(computation: Generator<E, R>, handlers: ToplevelHandlers<E, R>): R {
   //@ts-ignore-next-line
   return run(handle(computation, handlers))
 }
 
+/**
+ * Runs given computation asynchronously
+ *
+ * @param computation - A computation to evaluate
+ * @param handlers - Handlers to handle whole effect of given computation
+ */
 export function unsafeRunAsync<E extends Effects, R>(computation: Generator<E, R>, handlers: ToplevelHandlers<E, R>): Promise<R> {
   function unsafeAsyncRunner(resumeValue: unknown): Promise<R> {
     return new Promise(resolve => {
