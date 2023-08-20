@@ -1,1 +1,1 @@
-export { Spec, createEffect, Effectful, handle, Handlers, Derive } from './core'
+export { Effect, Effects, createCodeConstructors, Effectful, Handlers, handle, run } from './core'
