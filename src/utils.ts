@@ -1,26 +1,26 @@
 /**
- * Transforms given union type into intersection type
+ * Transforms given union type into intersection type.
  *
  * @internal
  *
- * Source: {@link https://stackoverflow.com/a/50375286}
+ * Reference: {@link https://stackoverflow.com/a/50375286}
  */
 export type UnionToIntersection<U>
   = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
 
 /**
- * A type used to mark branch of conditional type as unreachable
+ * A type used to mark branch of conditional type as unreachable.
  *
- * If this type shown up in the branch of conditional type, it means that case couldn't be happened
+ * If this type shown up in the branch of conditional type, it means that case couldn't be happened.
  *
  * @internal
  */
 export type Unreachable = never
 
 /**
- * Test equality of given two types
+ * Test equality of given two types.
  *
- * If given two types are equal, returns 'true' literal type. If not, returns 'false' literal type
+ * If given two types are equal, returns 'true' literal type. If not, returns 'false' literal type.
  *
  * @internal
  *
@@ -34,7 +34,10 @@ export type Eq<A, B>
 
 const DELAY_MARKER: unique symbol = Symbol('@hyogwa/delay-marker')
 /**
- * Marks type not to be substituted eagerly
+ * Marks type not to be substituted eagerly.
+ *
+ * This seems to only work in some cases. Further investigation required.
+ * P.S. 'null' and 'undefined' types are forbidden since current implementation couldn't support them.
  *
  * @internal
  *
@@ -43,30 +46,26 @@ const DELAY_MARKER: unique symbol = Symbol('@hyogwa/delay-marker')
 export type Delay<T extends {}> = T & { [DELAY_MARKER]: never }
 
 /**
- * Simplifies given type
+ * Simplifies given type.
  *
- * Having typescript to eagerly compute intersection types, simplifies given type
+ * Having typescript to eagerly compute intersection types, simplifies given type.
+ * This works shallowly. In case we need more complex simplifications, then extend this utility to solve it.
+ * i.e. Add 'depth' parameter like Array#flat's one to this type.
  *
  * @internal
  *
- * @privateRemarks
- *
- * This utility works shallowly
- *
  * @typeParam T - Any type to simplify
  *
- * Source: {@link https://github.com/microsoft/TypeScript/issues/47980#issuecomment-1049304607}
+ * Reference: {@link https://github.com/microsoft/TypeScript/issues/47980#issuecomment-1049304607}
  */
 export type Simplify<T> = T extends unknown ? { [K in keyof T]: T[K] } : never;
 
 /**
- * A type guard checking whether given value is generator or not
+ * A type guard checking whether given value is generator or not.
  *
  * @internal
  *
- * @privateRemarks
- *
- * This utility applies duck-typing to distinguish generator object
+ * This utility applies duck-typing to distinguish generator object.
  *
  * @param value - Value to check
  * @returns boolean
