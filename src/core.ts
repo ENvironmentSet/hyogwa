@@ -81,6 +81,8 @@ export type Effects = Code<string, unknown[], unknown>
  * constructs type of effectful computations that may produce arbitrary number of effects specified in type 'E'
  * and result in value of type 'R'
  *
+ * NOTE: It's highly recommended to explicitly type every effectful function with this type.
+ *
  * @alpha
  *
  * @privateRemarks
@@ -204,6 +206,9 @@ export interface HandleTactics<in ER, in R> {
 
 /**
  * Constructs type of value to handle given effects
+ *
+ * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
+ * Do not use this type to directly type something.
  *
  * @alpha
  *
@@ -366,6 +371,9 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
 /**
  * Handles effects of given computation via given handlers
  *
+ * Handle functions must call handle tactics exactly once before they terminate.
+ * In addition, they must not have any implicit effects(effects weren't typed in their signature).
+ *
  * @alpha
  *
  * @param computation - Computation to resolve some effects
@@ -411,6 +419,9 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
 /**
  * Handles effects of given computation via given handlers
  *
+ * Handle functions must call handle tactics exactly once before they terminate.
+ * In addition, they must not have any implicit effects(effects weren't typed in their signature).
+ *
  * @alpha
  *
  * @param handlers - Handlers to handle some effects of given computation
@@ -455,6 +466,9 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
  * Handles effects of given block via given handlers
+ *
+ * Handle functions must call handle tactics exactly once before they terminate.
+ * In addition, they must not have any implicit effects(effects weren't typed in their signature).
  *
  * @alpha
  *
