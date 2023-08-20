@@ -111,7 +111,7 @@ type CodeConstructors<E extends Effects>
  *
  * @typeParam E - An effect to extract name
  */
-type NameOfEffect<E extends Effects> = E['construction'] extends `${infer N}.${infer _}` ? N : never
+export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer N}.${infer _}` ? N : never
 
 /**
  * Creates code constructors for given effect
