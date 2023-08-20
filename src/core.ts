@@ -9,7 +9,7 @@ import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable } fr
  * @typeParam P - Types of code's parameters (a never type or tuple type is expected)
  * @typeParam T - Type of code represented
  */
-interface Code<C extends string, P extends unknown[], T> { // Here, unknown[] means arbitrary-length tuple type
+export interface Code<C extends string, P extends unknown[], T> { // Here, unknown[] means arbitrary-length tuple type
   construction: C
   parameters: P
   type: T // This field doesn't exist at runtime. Only for holding phantom type parameter 'T'
@@ -149,7 +149,7 @@ export function createCodeConstructors<E extends Effects>(effectName: NameOfEffe
  * @typeParam ER - Evaluation result type of currently handled code
  * @typeParam R - Result type of whole handling operation
  */
-interface HandleTactics<in ER, in R> {
+export interface HandleTactics<in ER, in R> {
   resume(value: ER): void
   abort(value: R): void
 }
