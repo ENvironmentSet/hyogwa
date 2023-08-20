@@ -259,10 +259,14 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
       if (typeof handlers[scope]![constructorName] === 'function') {
         const possiblyEffectfulComputation = handlers[scope]![constructorName](...parameters, {
           resume(value) {
+            if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
+
             raised = computation.next(value)
             isCodeHandled = true
           },
           abort(value) {
+            if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
+
             result = value
             aborted = true
             isCodeHandled = true
