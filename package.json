@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./core": "./src/index.ts",
     "./runners": "./src/runners.ts",
     "./assistant": "./src/assistant.ts",
     "./exception": "./src/exception.ts",

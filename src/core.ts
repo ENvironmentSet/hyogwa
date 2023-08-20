@@ -1,269 +1,362 @@
-import { UnionToIntersection } from './utils'
-
-export const EFFECT_NAME: unique symbol = Symbol.for('hyogwa/effect-name')
+import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable } from './utils';
 
 /**
- * This type has two different meaning:
- * 1. Base type for effect specification types
- * 2. Type of Types which includes every possible effect specification types (i.e. Kind of effect specification types)
+ * Constructor for types of values representing code
  *
- * (second one is possible thanks to subtype polymorphism)
- */
-export interface Spec<N extends string = string> {
-  [EFFECT_NAME]: N
-}
-
-/**
- * Type of Actions(Effectful terms/codes/operations)
+ * @internal
  *
- * Parameterized by name of the effect where the action belongs('EN'), name of the action constructor('CN')
- * and type of parameters the action requires('P')
+ * @typeParam C - The name of construction (a string literal type is expected)
+ * @typeParam P - Types of code's parameters (a never type or tuple type is expected)
+ * @typeParam T - Type of code represented
  */
-export interface Action<EN, CN, P> {
-  effectName: EN
-  constructorName: CN
+export interface Code<C extends string, P extends unknown[], T> { // Here, unknown[] means arbitrary-length tuple type
+  construction: C
   parameters: P
+  type: T // This field doesn't exist at runtime. Only for holding phantom type parameter 'T'
 }
 
-type PickActionNames<S extends Spec> = Exclude<keyof S, typeof EFFECT_NAME>
+/**
+ * Effect type constructor
+ *
+ * With the name and spec of the new effect, constructs type representing the effect
+ *
+ * @alpha
+ *
+ * @typeParam N - The name of the new effect (a string literal type is expected)
+ * @typeParam S - The specification of the new effect
+ */
+export type Effect<N extends string, S extends {}>
+  = Delay<
+      keyof S extends infer K ?
+        K extends string & keyof S ?
+          Code<
+            `${N}.${K}`,
+            S[K] extends (...parameters: infer P) => unknown ? P : never,
+            S[K] extends (...parameters: never) => infer R ? R : S[K]
+          >
+          : never
+      : Unreachable
+    >
 
 /**
- * Produce action types from given effect(specification)
+ * Supertype of every effects
+ *
+ * Only for constraining type parameters, do not use this type to directly type something.
+ *
+ * @alpha
  */
-type ActionFromSpec<S extends Spec>
-  = PickActionNames<S> extends infer K ?
-      K extends keyof S ?
-        Action<S[typeof EFFECT_NAME], K, S[K] extends (...args: infer P) => unknown ? P : never>
+export type Effects = Code<string, unknown[], unknown>
+
+/**
+ * Constructor of type representing effectful computation
+ *
+ * With given effects 'E' and type of evaluation result value 'R',
+ * constructs type of effectful computations that may produce arbitrary number of effects specified in type 'E'
+ * and result in value of type 'R'
+ *
+ * @alpha
+ *
+ * @privateRemarks
+ *
+ * To help the type inference, naked 'Generator' type is used in some places.
+ * But the concern that using 'Effectful' for input parameters may disturb type inference has little basis,
+ * After some investigation this type might be used in all the places.
+ * And that's might be great for users and library authors.
+ *
+ * @typeParam E - Union of effect types that the computation may raise
+ * @typeParam R - Type of evaluation result value
+ */
+export interface Effectful<E, R> extends Generator<E, R> {}
+
+/**
+ * Constructs collection of code constructors for given effect
+ *
+ * @internal
+ *
+ * @privateRemarks
+ *
+ * For some reason, typescript narrows type assigned to type parameter when distributed union is involved.
+ * 'E_' exists to protect 'E' from narrowing.
+ *
+ * @typeParam E - An effect to derive code constructors
+ * @typeParam E_ - Same type as 'E'
+ */
+type _CodeConstructors<E extends Effects, E_ extends Effects>
+  = UnionToIntersection<
+      E_ extends Code<`${infer _}.${infer C}`, infer P, infer R> ?
+        Eq<P, never> extends true ?
+          { [K in C]: Effectful<E, R> }
+          : { [K in C]: (...parameters: P) => Effectful<E, R> }
         : never
-      : never
-
-/** ActionFromSpec iterating over union of specs */
-type ActionsFromSpecs<S extends Spec>
-  = S extends infer S_ ?
-      S_ extends Spec ?
-        ActionFromSpec<S_>
-        : never
-      : never
+    >
 
 /**
- * Type of effectful computation
+ * Constructs collection of code constructors for given effect
  *
- * Parameterized by spec of effects('S') and evaluation result type('R').
- * It's possible to provide multiple effect spec by combining specs via union.
+ * @internal
  *
- * Theoretically, Effectful computation is Generator object that...
+ * @privateRemarks
  *
- * 1. May yield arbitrary number of actions.
- * 2. Must return computation result of type 'R' as return value.
+ * Wrapped version of '_CodeConstructors'. Use this instead of '_CodeConstructors'.
+ *
+ * @typeParam E - An effect to derive code constructors
  */
-export interface Effectful<S extends Spec, R> extends Generator<ActionsFromSpecs<S>, R> {
-  [Symbol.iterator](): Effectful<S, R>
-}
+type CodeConstructors<E extends Effects>
+  = Simplify<_CodeConstructors<E, E>>
 
 /**
- * Type of Effect
+ * Extract name of effect from type level representation of effect
  *
- * Takes an effect spec and returns actual representation of that effect
+ * @internal
+ *
+ * @typeParam E - An effect to extract name
  */
-type Effect<S extends Spec> = {
-  [K in PickActionNames<S>]: S[K] extends (...args: infer P) => infer R ? (...args: P) => Effectful<S, R> : Effectful<S, S[K]>
-}
+export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer N}.${infer _}` ? N : never
 
 /**
- * Type utility for deriving new effect from another
- */
-export type Derive<N extends string, S extends Spec> = Omit<S, typeof EFFECT_NAME> & { [EFFECT_NAME]: `${N}` }
-
-/**
- * Effect constructor
+ * Creates code constructors for given effect
  *
- * Given an effect specification as type argument and an effect name as actual argument,
- * returns an actual effect representation. Actual effect representation contains action constructors.
+ * @alpha
+ *
+ * @param effectName - the name of given effect
+ * @returns code constructors for given effect
  */
-export function createEffect<S extends Spec>(effectName: S[typeof EFFECT_NAME]): Effect<S> {
+export function createCodeConstructors<E extends Effects>(effectName: NameOfEffect<E>): CodeConstructors<E> {
   return new Proxy({}, {
-    // Property accesses which have passed type check are always access to action creators
-    get(_, constructorName) {
-      // Action creator for function effects
+    get(_, constructorName: string) {
       //@ts-ignore-next-line
-      const result = function* (...parameters) {
+      const constructor = function* (...parameters) {
         //@ts-ignore-next-line
-        return yield { effectName, constructorName, parameters }
+        return yield { construction: `${effectName}.${constructorName}`, parameters }
       }
 
-      // Action creator for value effects
       //@ts-ignore-next-line
-      result[Symbol.iterator] = function* () {
+      constructor[Symbol.iterator] = function* () {
         //@ts-ignore-next-line
-        return yield { effectName, constructorName }
+        return yield { construction: `${effectName}.${constructorName}` }
       }
 
-      return result
+      return constructor
     }
-  }) as Effect<S>
+  }) as CodeConstructors<E>
 }
-//@TODO: make this function only require spec of new effect
 
 /**
  * Interface for handle tactics
  *
- * Parameterized by type of the effect evaluation result('ER') and type of the handle abortion value('R')
- * if 'abort' is never used in actual implementation, you may pass 'never' as 'R'.
+ * @internal
  *
- * short description:
- *  'ER' for type of value which will be passed to original context
- *  'R' for type of value which will be used as result of 'handle' call
+ * @typeParam ER - Evaluation result type of currently handled code
+ * @typeParam R - Result type of whole handling operation
  */
-interface HandleTactics<in ER, in R> {
+export interface HandleTactics<in ER, in R> {
   resume(value: ER): void
   abort(value: R): void
 }
 
 /**
- * Produce handler type definition for given effect(specification)
+ * Constructs type of value to handle given effects
  *
- * Type parameter 'R' is type of effect handle's result(note that this is not type of action handle's result)
+ * @alpha
  *
- * WARNING: This type must be used with 'satisfy' operator or used as constraint on type variable.
- * Do not directly annotate handlers as this type.
+ * @typeParam E - Effects to handle
+ * @typeParam R - Result type of handling operation
  */
-type HandlerFromSpec<S extends Spec, R> = {
-  [K in PickActionNames<S>]:
-    S[K] extends (...args: infer P) => infer ER ?
-      (...args: [...P, HandleTactics<ER, R>]) => void | Effectful<Spec, void>
-      : S[K] | Effectful<Spec, S[K]>
-}
-/** it's okay to leave place of effect with most general type 'Spec'
- * using type variable and inference smart will care your concern
- * ref: 'handle' function
- */
-
-/** HandlerFromSpec iterating over union of specs */
-type HandlersFromSpecs<S extends Spec, R>
-  = UnionToIntersection<
-  S extends infer S_ ?
-    S_ extends Spec ?
-      { [K in S_[typeof EFFECT_NAME]]: HandlerFromSpec<S, R> }
-      : never
-    : never
->
-
-/**
- * Produce handler type definition for given effect(specification)
- *
- * Type parameter 'R' is type of effect handle's result(note that this is not type of action handle's result)
- *
- * WARNING: This type must be used with 'satisfy' operator or used as constraint on type variable.
- * Do not directly annotate handlers as this type.
- */
-export type Handlers<S extends Spec, R = never> = HandlersFromSpecs<S, R>
-
-/**
- * Collects used effects from given handler(type)
- */
-export type CollectEffectsFromHandlers<H>
-  = keyof H extends infer K1 ?
-      K1 extends keyof H ?
-        keyof H[K1] extends infer K2 ?
-          K2 extends keyof H[K1] ?
-            H[K1][K2] extends () => Effectful<infer E, unknown> ?
-              E
-              : H[K1][K2] extends Effectful<infer E, unknown> ?
-                  E
-                  : never
-            : never
+export type Handlers<E extends Effects, R = never>
+  = Simplify<
+      UnionToIntersection<
+        E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
+          Eq<P, never> extends false ?
+            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Generator<Effects, void> } }
+            : { [K in S]: { [K in C]: ER | Generator<Effects, ER> } }
           : never
-        : never
-      : never
+      >
+    >
 
-export class HandleError extends Error {
-  constructor(action: Action<string, string, unknown[]>, reason: string) {
+/**
+ * An error class to represent errors happened while handling codes
+ *
+ * @internal
+ */
+class HandleError extends Error {
+  /**
+   * @param code - A code object that were being handled when error occurred
+   * @param reason - The reason
+   */
+  constructor(code: Code<string, unknown[], unknown>, reason: string) {
     super(`
-      Fail to handle action '${action.effectName}.${action.constructorName}'\n${reason}
+      Fail to handle action '${code.construction}'\n${reason}
     `.trim());
   }
 }
 
-type ExcludeHandledEffects<S, H> = Exclude<S, { [EFFECT_NAME]: keyof H }>
+/**
+ * Collects effects used in given handlers
+ *
+ * @internal
+ *
+ * @typeParam H - Handlers to collect effects from
+ */
+export type UsedEffectsInHandlers<H>
+  = keyof H extends infer HK ?
+      HK extends keyof H ?
+        keyof H[HK] extends infer K ?
+          K extends keyof H[HK] ?
+            H[HK][K] extends (...parameters: never) => Generator<infer E extends Effects, unknown> ?
+              E
+              : H[HK][K] extends Generator<infer E extends Effects, unknown> ?
+                  E
+                  : never
+            : Unreachable
+          : Unreachable
+        : Unreachable
+      : Unreachable
 
-function* _handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
-// those were type of parameters, following is return type
-  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R> {
-  let thrown = computation.next()
-  let isPreviousEffectResolved = true
+/**
+ * Exclude effects that are handled by given handlers
+ *
+ * @internal
+ *
+ * @typeParam E - Collection of effects
+ * @typeParam H - Handlers for 'E'
+ */
+export type ExcludeHandledEffects<E extends Effects, H>
+  = Exclude<
+      E,
+      {
+        construction:
+          keyof H extends infer HK extends string ?
+            HK extends keyof H ?
+              keyof H[HK] extends infer K extends string ?
+                K extends keyof H[HK] ?
+                  `${HK}.${K}`
+                  : Unreachable
+                : Unreachable
+              : Unreachable
+            : Unreachable
+      }
+    >
+
+/**
+ * Handles effects of given computation via given handlers
+ *
+ * @internal
+ *
+ * @param computation - Computation to resolve some effects
+ * @param handlers - Handlers to handle some effects of given computation
+ */
+function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(computation: Generator<E, R>, handlers: H)
+  : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
+  let raised = computation.next()
+  let result: R
   let aborted = false
-  let abortedValue
 
-  while (!thrown.done && isPreviousEffectResolved && !aborted) {
-    const action = thrown.value
-    isPreviousEffectResolved = false
+  while (!raised.done && !aborted) {
+    const code: E = raised.value
+    const { construction, parameters } = code
+    const [ scope, constructorName ] = construction.split('.')
+    let isCodeHandled = false
 
-    // @ts-ignore-next-line
-    if (action.effectName in handlers && action.constructorName in handlers[action.effectName]) {
-      // handle value effects
-      // @ts-ignore-next-line
-      if (typeof handlers[action.effectName][action.constructorName] !== 'function') {
-        // @ts-ignore-next-line
-        thrown = computation.next(handlers[action.effectName][action.constructorName])
-        isPreviousEffectResolved = true
+    if (scope in handlers) {
+      //@ts-ignore-next-line
+      if (typeof handlers[scope][constructorName] === 'function') {
+        //@ts-ignore-next-line
+        const possiblyEffectfulComputation = handlers[scope][constructorName](...parameters, {
+          //@ts-ignore-next-line
+          resume(value) {
+            if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
+
+            raised = computation.next(value)
+            isCodeHandled = true
+          },
+          //@ts-ignore-next-line
+          abort(value) {
+            if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
+
+            result = value
+            aborted = true
+            isCodeHandled = true
+          }
+        })
+
+        if (isGenerator(possiblyEffectfulComputation))
+          //@ts-ignore-next-line
+          yield* possiblyEffectfulComputation
       } else {
-        // handle operational effects
-        // @ts-ignore-next-line
-        const maybeComputation = handlers[action.effectName][action.constructorName](
-          // @ts-ignore-next-line
-          ...action.parameters,
-          {
-            // @ts-ignore-next-line
-            resume(value) {
-              if (isPreviousEffectResolved) throw new HandleError(action, 'cannot call handle tactics more than once')
-              thrown = computation.next(value)
-              isPreviousEffectResolved = true
-            },
-            // @ts-ignore-next-line
-            abort(value) {
-              if (isPreviousEffectResolved) throw new HandleError(action, 'cannot call handle tactics more than once')
-              // mark effect handling process is aborted and save return value
-              abortedValue = value
-              isPreviousEffectResolved = true
-              aborted = true
-            }
-          })
-
-        // handle handlers which produce more effects
-        if (typeof maybeComputation?.[Symbol.iterator] === 'function')
-          // @ts-ignore-next-line
-          yield* maybeComputation
+        raised = computation.next(
+          //@ts-ignore-next-line
+          isGenerator(handlers[scope][constructorName]) ?
+            //@ts-ignore-next-line
+            yield* handlers[scope][constructorName]
+            //@ts-ignore-next-line
+            : handlers[scope][constructorName]
+        )
+        isCodeHandled = true
       }
     } else {
-      // case when handler for given action is not exist
-      thrown = computation.next(yield action)
-      isPreviousEffectResolved = true
+      //@ts-ignore-next-line
+      raised = computation.next(yield code)
+      isCodeHandled = true
     }
+
+    if (!isCodeHandled) throw new HandleError(code, 'Handler functions must call handle tactics')
   }
 
-  if (!isPreviousEffectResolved)
-    throw new HandleError(thrown.value as Action<string, string, unknown[]>, 'Effect handlers must call handle tactics')
+  if (raised.done) result = raised.value
 
-  return aborted ? abortedValue! : thrown.value
+  return result!
 }
 
 /**
- * Resolves some effects of given computation by attaching handlers
+ * Handles effects of given computation via given handlers
  *
- * Handlers must handle effects with handle tactics(ex: 'resume') before they return something
- * Assumption: given computation must be 'fresh' one (i.e. the one never executed after creation)
+ * @alpha
  *
- * To find actual implementation, see 'handle_' function.
+ * @param computation - Computation to resolve some effects
+ * @param handlers - Handlers to handle some effects of given computation
+ * @returns An effectful computation which effects that handled by 'H' are resolved
  */
-export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
-  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: Effectful<E, R>)
-  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(handlers: H, computation: () => Effectful<E, R>)
-  : Effectful<ExcludeHandledEffects<E, H> | CollectEffectsFromHandlers<H>, R>
-export function handle<E extends Spec, R, H extends Partial<Handlers<E, R>>>(first: Effectful<E, R> | H, second?: H | Effectful<E, R> | (() => Effectful<E, R>))
-  : (Effectful<Exclude<E, { [EFFECT_NAME]: keyof H }> | CollectEffectsFromHandlers<H>, R>) {
-  if (Symbol.iterator in first) return _handle<E, R, H>(first, second as H)
-  else if (typeof second === 'function') return _handle<E, R, H>(second(), first)
-  else return _handle<E, R, H>(second as Effectful<E, R>, first)
+export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+  (computation: Generator<E, R>, handlers: H)
+  : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
+/**
+ * Handles effects of given computation via given handlers
+ *
+ * @alpha
+ *
+ * @param handlers - Handlers to handle some effects of given computation
+ * @param computation - Computation to resolve some effects
+ * @returns An effectful computation which effects that handled by 'H' are resolved
+ */
+export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+  (handlers: H, computation: Generator<E, R>)
+  : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
+/**
+ * Handles effects of given block via given handlers
+ *
+ * @alpha
+ *
+ * @param handlers - Handlers to handle some effects of given computation
+ * @param block - Function with no parameters, resulting effectful computation
+ * @returns An effectful computation which effects that handled by 'H' are resolved
+ */
+export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+  (handlers: H, block: () => Generator<E, R>)
+  : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
+export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+  (first: Generator<E, R> | H, second: H | Generator<E, R> | (() => Generator<E, R>) )
+  : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
+    if (isGenerator(first)) return _handle(first, second as H)
+    else if (isGenerator(second)) return _handle(second, first as H)
+    else return _handle((second as () => Generator<E, R>)(), first)
+}
+
+/**
+ * Runs a pure computation
+ *
+ * @param computation - A pure computation to run
+ * @returns The result of evaluating given computation
+ */
+export function run<R>(computation: Generator<never, R>): R {
+  return computation.next().value
 }

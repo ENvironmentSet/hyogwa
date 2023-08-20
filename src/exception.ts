@@ -1,12 +1,34 @@
-import { Spec, createEffect, Handlers } from './core';
+import { createCodeConstructors, Effect, Handlers } from './core';
 
-export interface Exception<T, N extends string> extends Spec<N> {
+/**
+ * Effect spec template for exception effects (similar to 'Either' or 'Result' monads)
+ *
+ * @alpha
+ *
+ * @typeParam T - A type of value representing error
+ */
+export interface Exception<T> {
   raise(representation: T): never
 }
 
-export interface SimpleException extends Exception<string | undefined, 'SimpleException'> {}
-export const SimpleException = createEffect<SimpleException>('SimpleException')
-export const unsafeSimpleExceptionHandler = {
+/**
+ * Simple implementation of exception effect where string represents error and error representation can be omitted
+ *
+ * @alpha
+ */
+export type SimpleException = Effect<'SimpleException', Exception<string | void>>
+/**
+ * Simple implementation of exception effect where string represents error and error representation can be omitted
+ *
+ * @alpha
+ */
+export const SimpleException = createCodeConstructors<SimpleException>('SimpleException')
+/**
+ * Unsafe handlers for 'SimpleException'
+ *
+ * @alpha
+ */
+export const unsafeSimpleExceptionHandlers = {
   SimpleException: {
     raise(representation) {
       throw representation
