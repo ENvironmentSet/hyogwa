@@ -3,7 +3,7 @@
  *
  * @internal
  *
- * Reference: {@link https://stackoverflow.com/a/50375286}
+ * @see {@link https://stackoverflow.com/a/50375286}
  */
 export type UnionToIntersection<U>
   = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
@@ -27,7 +27,7 @@ export type Unreachable = never
  * @typeParam A - type to test equality
  * @typeParam B - type to test equality
  *
- * Reference: {@link https://stackoverflow.com/a/59346699}
+ * @see {@link https://stackoverflow.com/a/59346699}
  */
 export type Eq<A, B>
   = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false
@@ -56,7 +56,7 @@ export type Delay<T extends {}> = T & { [DELAY_MARKER]: never }
  *
  * @typeParam T - Any type to simplify
  *
- * Reference: {@link https://github.com/microsoft/TypeScript/issues/47980#issuecomment-1049304607}
+ * @see {@link https://github.com/microsoft/TypeScript/issues/47980#issuecomment-1049304607}
  */
 export type Simplify<T> = T extends unknown ? { [K in keyof T]: T[K] } : never;
 
