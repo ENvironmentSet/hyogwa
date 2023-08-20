@@ -1,32 +1,33 @@
 # hyogwa — Natural 🌿 effect system that fits TypeScript
 
 ```typescript
-import { Spec, createEffect, Effectful } from 'hyogwa/core';
+import { Effect, createCodeConstructors } from 'hyogwa/core';
 import { unsafeRunSync } from 'hyogwa/runners';
 
-// Defining own IO effect
+// Define own IO effect
 
-interface IO extends Spec<'IO'> {
+type IO = Effect<'IO', {
   read(): string
   write(text: string): void
-}
-const IO = createEffect<IO>('IO')
+}>
+const IO = createCodeConstructors<IO>('IO')
 
-// Having a function with IO effect
+// Write a function with IO effect
 
-function* main(): Effectful<IO, void> {
+function* main() {
   const name = yield* IO.read()
 
   yield* IO.write(`Welcome to hyogwa, ${name}!`)
 }
 
-// Running the main function while handling effects
+// Run the function while handling IO effect
 
 unsafeRunSync(main(), {
   IO: {
     read({ resume }) {
       resume(prompt() || '')
     },
+    
     write(text, { resume }) {
       alert(text)
       resume()
@@ -63,23 +64,9 @@ As an effect system, hyogwa solves the problem for you. Moreover, hyogwa has the
 - 🌿 Natural interface: No more suspicious wrapper functions, or cumbersome utilities; Write codes as you write **plain typescript code**.
 - 🏃 Write once, run everywhere: You can perfectly **decouple business logics** from platform specific logics.
 - 🙌 Easy effect composition: **Composing effects is done simply by making union of them**; nothing special required.
-- ⏳ Time-saving minimal interface: You can start writing code right after only learning **three functions** and **two types**.
+- ⏳ Time-saving minimal interface: You can start writing code right after only learning **three functions** and **one type**.
 - 🧑‍💻 Advanced development experience: **Built-in coding assistant** is ready for you; it works without extra configuration.
-
-<details>
-  <summary>Read more about advantages of hyogwa (WIP)</summary>
-
-  ### 🌿 Natural interface
-  
-  ### 🏃 Write once, run everywhere
-
-  ### 🙌 Easy effect composition
-
-  ### ⏳ Time-saving minimal interface
-
-  ### ‍💻 Advanced development experience
-
-</details>
+- 🔍 Type inference friendly design: TypeScript compiler will **infer almost every type** for you; hyogwa's design is not only easy for users but also for compilers.
 
 ## Handbook
 
