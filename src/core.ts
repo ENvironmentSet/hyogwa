@@ -18,7 +18,8 @@ export interface Code<C extends string, P extends unknown[], T> { // Here, unkno
 /**
  * Effect type constructor
  *
- * With the name and spec of the new effect, constructs type representing the effect
+ * With the name and spec of the new effect, constructs type representing the effect.
+ * Note that functions listed in the effect specification must not be generic(i.e. they must be monomorphic).
  *
  * @alpha
  *
