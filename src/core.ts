@@ -67,9 +67,9 @@ export type Effect<N extends string, S extends {}>
  *   for (const element of array) {
  *     result.push(yield* f(element))
  *   }
- * }
  *
- * return result
+ *   return result
+ * }
  * ```
  */
 export type Effects = Code<string, unknown[], unknown>
@@ -168,7 +168,6 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
  *   write(text: string): void
  * }>
  * const IO = createCodeConstructors<IO>('IO')
- *
  * ```
  */
 export function createCodeConstructors<E extends Effects>(effectName: NameOfEffect<E>): CodeConstructors<E> {
