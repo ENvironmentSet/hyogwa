@@ -164,11 +164,13 @@ export interface HandleTactics<in ER, in R> {
  */
 export type Handlers<E extends Effects, R = never>
   = Simplify<
-      E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
-        Eq<P, never> extends false ?
-          { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Generator<Effects, void> } }
-          : { [K in S]: { [K in C]: ER | Generator<Effects, ER> } }
-        : never
+      UnionToIntersection<
+        E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
+          Eq<P, never> extends false ?
+            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Generator<Effects, void> } }
+            : { [K in S]: { [K in C]: ER | Generator<Effects, ER> } }
+          : never
+      >
     >
 
 /**
@@ -195,7 +197,7 @@ class HandleError extends Error {
  *
  * @typeParam H - Handlers to collect effects from
  */
-type UsedEffectsInHandlers<H>
+export type UsedEffectsInHandlers<H>
   = keyof H extends infer HK ?
       HK extends keyof H ?
         keyof H[HK] extends infer K ?
@@ -218,7 +220,7 @@ type UsedEffectsInHandlers<H>
  * @typeParam E - Collection of effects
  * @typeParam H - Handlers for 'E'
  */
-type ExcludeHandledEffects<E extends Effects, H>
+export type ExcludeHandledEffects<E extends Effects, H>
   = Exclude<
       E,
       {
@@ -256,14 +258,18 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
     let isCodeHandled = false
 
     if (scope in handlers) {
-      if (typeof handlers[scope]![constructorName] === 'function') {
-        const possiblyEffectfulComputation = handlers[scope]![constructorName](...parameters, {
+      //@ts-ignore-next-line
+      if (typeof handlers[scope][constructorName] === 'function') {
+        //@ts-ignore-next-line
+        const possiblyEffectfulComputation = handlers[scope][constructorName](...parameters, {
+          //@ts-ignore-next-line
           resume(value) {
             if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
 
             raised = computation.next(value)
             isCodeHandled = true
           },
+          //@ts-ignore-next-line
           abort(value) {
             if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
 
@@ -278,10 +284,12 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
           yield* possiblyEffectfulComputation
       } else {
         raised = computation.next(
-          isGenerator(handlers[scope]![constructorName]) ?
+          //@ts-ignore-next-line
+          isGenerator(handlers[scope][constructorName]) ?
             //@ts-ignore-next-line
-            yield* handlers[scope]![constructorName]
-            : handlers[scope]![constructorName]
+            yield* handlers[scope][constructorName]
+            //@ts-ignore-next-line
+            : handlers[scope][constructorName]
         )
         isCodeHandled = true
       }
