@@ -7,7 +7,7 @@
     ".": "./src/index.ts",
     "./core": "./src/index.ts",
     "./runners": "./src/runners.ts",
-    "./assistant": "./src/assistant.ts",
+    "./assistant": "./src/assistants.ts",
     "./exception": "./src/exception.ts",
     "./env": "./src/env.ts",
     "./state": "./src/state.ts",

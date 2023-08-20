@@ -3,7 +3,7 @@
   "entryPoints": [
     "./src/core.ts",
     "./src/runners.ts",
-    "./src/assistant.ts",
+    "./src/assistants.ts",
     "./src/state.ts",
     "./src/env.ts",
     "./src/log.ts",
