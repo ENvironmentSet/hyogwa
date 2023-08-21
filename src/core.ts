@@ -417,49 +417,9 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (computation: Generator<E, R>, handlers: H)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
- * Handles effects of given computation via given handlers
- *
- * Handle functions must call handle tactics exactly once before they terminate.
- * In addition, they must not have any implicit effects(effects weren't typed in their signature).
+ * Overload for 'handle', nothing different except order of arguments are reversed.
  *
  * @alpha
- *
- * @param handlers - Handlers to handle some effects of given computation
- * @param computation - Computation to resolve some effects
- * @returns An effectful computation which effects that handled by 'H' are resolved
- *
- * @example Handling Exception
- *
- * ```typescript
- * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
- * import { Exception } from 'hyogwa/exception'
- *
- * type DivideByZero = Effect<'DivideByZero', Exception<void>>
- * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
- *
- * function* div(x, y): Effectful<DivideByZero, number> {
- *   if (y === 0) yield* DivideByZero.raise()
- *
- *   return x / y
- * }
- *
- * function main(): Effectful<never, number> {
- *   const result = yield* handle(
- *     div(1, 0),
- *     {
- *       DivideByZero: {
- *         raise(_, { abort }) {
- *           abort(NaN)
- *         }
- *       }
- *     }
- *   )
- *
- *   return result
- * }
- *
- * run(main())
- * ```
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (handlers: H, computation: Generator<E, R>)
