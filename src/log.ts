@@ -1,7 +1,7 @@
 /**
  * Effect spec template for logging effects (a.k.a. 'Writer')
  *
- * @alpha
+ * @beta
  *
  * @typeParam T - A type of value representing log
  *

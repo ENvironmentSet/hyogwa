@@ -21,7 +21,7 @@ export interface Code<C extends string, P extends unknown[], T> { // Here, unkno
  * With the name and spec of the new effect, constructs type representing the effect.
  * Note that functions listed in the effect specification must not be generic(i.e. they must be monomorphic).
  *
- * @alpha
+ * @beta
  *
  * @typeParam N - The name of the new effect (a string literal type is expected)
  * @typeParam S - The specification of the new effect
@@ -55,7 +55,7 @@ export type Effect<N extends string, S extends {}>
  *
  * Only for constraining type parameters, do not use this type to directly type something.
  *
- * @alpha
+ * @beta
  *
  * @example Array#map for effectful functions
  *
@@ -84,7 +84,7 @@ export type Effects = Code<string, unknown[], unknown>
  *
  * NOTE: It's highly recommended to explicitly type every effectful function with this type.
  *
- * @alpha
+ * @beta
  *
  * @privateRemarks
  *
@@ -154,7 +154,7 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
 /**
  * Creates code constructors for given effect
  *
- * @alpha
+ * @beta
  *
  * @param effectName - the name of given effect
  * @returns code constructors for given effect
@@ -210,7 +210,7 @@ export interface HandleTactics<in ER, in R> {
  * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
  * Do not use this type to directly type something.
  *
- * @alpha
+ * @beta
  *
  * @typeParam E - Effects to handle
  * @typeParam R - Result type of handling operation
@@ -374,7 +374,7 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
  * Handle functions must call handle tactics exactly once before they terminate.
  * In addition, they must not have any implicit effects(effects weren't typed in their signature).
  *
- * @alpha
+ * @beta
  *
  * @param computation - Computation to resolve some effects
  * @param handlers - Handlers to handle some effects of given computation
@@ -419,7 +419,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
 /**
  * Overload for 'handle', nothing different except order of arguments are reversed.
  *
- * @alpha
+ * @beta
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (handlers: H, computation: Generator<E, R>)
@@ -430,7 +430,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * Handle functions must call handle tactics exactly once before they terminate.
  * In addition, they must not have any implicit effects(effects weren't typed in their signature).
  *
- * @alpha
+ * @beta
  *
  * @param handlers - Handlers to handle some effects of given computation
  * @param block - Function with no parameters, resulting effectful computation
