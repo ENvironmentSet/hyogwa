@@ -151,6 +151,7 @@ handle(SomeHandler, function* () {
 
 ## `run<R>(computation: Effectful<never, R>): R`
 
-- `computation` : a pure computation to evaluate
+- `R` : type of given computation's result.
+- `computation` : a pure computation to evaluate.
 
 Evaluates the given pure computation.
