@@ -140,7 +140,13 @@ type _CodeConstructors<E extends Effects, E_ extends Effects>
  * @typeParam E - An effect to derive code constructors
  */
 type CodeConstructors<E extends Effects>
-  = Simplify<_CodeConstructors<E, E>>
+  = Simplify<
+      NameOfEffect<E> extends infer N ?
+        Eq<UnionToIntersection<N>, never> extends false ?
+          _CodeConstructors<E, E>
+          : never
+        : never
+    >
 
 /**
  * Extract name of effect from type level representation of effect
