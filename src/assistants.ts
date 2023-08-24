@@ -1,5 +1,5 @@
 import { Eq, Unreachable } from './utils';
-import { Effects, Handlers, NameOfEffect, ExcludeHandledEffects, UsedEffectsInHandlers } from './core';
+import { Effects, Handlers, NameOfEffect, ExcludeHandledEffects, UsedEffectsInHandlers, Effectful } from './core';
 
 /**
  * Type constructor constructing message representing type
@@ -75,8 +75,8 @@ export type InspectEffectfulFunction<G extends (...parameters: never) => Generat
  * type Inspection = InspectEffectHandling<typeof computationToHandle, typeof handlerToUse>
  * ```
  */
-export type InspectEffectHandling<C extends Generator<Effects, unknown>, H>
-  = C extends Generator<infer E extends Effects, infer R> ?
+export type InspectEffectHandling<C extends Effectful<Effects, unknown>, H>
+  = C extends Effectful<infer E extends Effects, infer R> ?
       Eq<E extends Effects ? NameOfEffect<E> : never, string> extends false ?
         H extends Partial<Handlers<E, R>> ?
           Suggestion<

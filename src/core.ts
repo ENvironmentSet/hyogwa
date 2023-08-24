@@ -104,7 +104,7 @@ export type Effects = Code<string, unknown[], unknown>
  * }
  * ```
  */
-export interface Effectful<E, R> extends Generator<E, R> {}
+export type Effectful<E, R> = Generator<E, R>
 
 /**
  * Constructs collection of code constructors for given effect
@@ -228,8 +228,8 @@ export type Handlers<E extends Effects, R = never>
       UnionToIntersection<
         E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
           Eq<P, never> extends false ?
-            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Generator<Effects, void> } }
-            : { [K in S]: { [K in C]: ER | Generator<Effects, ER> } }
+            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Effectful<Effects, void> } }
+            : { [K in S]: { [K in C]: ER | Effectful<Effects, ER> } }
           : never
       >
     >
@@ -263,9 +263,9 @@ export type UsedEffectsInHandlers<H>
       HK extends keyof H ?
         keyof H[HK] extends infer K ?
           K extends keyof H[HK] ?
-            H[HK][K] extends (...parameters: never) => Generator<infer E extends Effects, unknown> ?
+            H[HK][K] extends (...parameters: never) => Effectful<infer E extends Effects, unknown> ?
               E
-              : H[HK][K] extends Generator<infer E extends Effects, unknown> ?
+              : H[HK][K] extends Effectful<infer E extends Effects, unknown> ?
                   E
                   : never
             : Unreachable
@@ -306,7 +306,7 @@ export type ExcludeHandledEffects<E extends Effects, H>
  * @param computation - Computation to resolve some effects
  * @param handlers - Handlers to handle some effects of given computation
  */
-function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(computation: Generator<E, R>, handlers: H)
+function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
   let raised = computation.next()
   let result: R
@@ -414,7 +414,7 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
  * ```
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
-  (computation: Generator<E, R>, handlers: H)
+  (computation: Effectful<E, R>, handlers: H)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
  * Overload for 'handle', nothing different except order of arguments are reversed.
@@ -422,7 +422,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * @beta
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
-  (handlers: H, computation: Generator<E, R>)
+  (handlers: H, computation: Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
  * Handles effects of given block via given handlers
@@ -470,14 +470,14 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * ```
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
-  (handlers: H, block: () => Generator<E, R>)
+  (handlers: H, block: () => Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
-  (first: Generator<E, R> | H, second: H | Generator<E, R> | (() => Generator<E, R>) )
+  (first: Effectful<E, R> | H, second: H | Effectful<E, R> | (() => Effectful<E, R>) )
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
     if (isGenerator(first)) return _handle(first, second as H)
     else if (isGenerator(second)) return _handle(second, first as H)
-    else return _handle((second as () => Generator<E, R>)(), first)
+    else return _handle((second as () => Effectful<E, R>)(), first)
 }
 
 /**
@@ -492,6 +492,6 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * run(pureComputationToRun)
  * ```
  */
-export function run<R>(computation: Generator<never, R>): R {
+export function run<R>(computation: Effectful<never, R>): R {
   return computation.next().value
 }
