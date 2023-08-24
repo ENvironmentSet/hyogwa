@@ -1,4 +1,4 @@
-import { Effects, Code, HandleTactics, handle, run } from './core';
+import { Effects, Code, HandleTactics, handle, run, Effectful } from './core';
 import { Eq, Simplify } from './utils';
 
 export { run } from './core'
@@ -32,7 +32,7 @@ type ToplevelHandlers<E extends Effects, R = never>
  * unsafeRunSync(computationToRun, handlers)
  * ```
  */
-export function unsafeRunSync<E extends Effects, R>(computation: Generator<E, R>, handlers: ToplevelHandlers<E, R>): R {
+export function unsafeRunSync<E extends Effects, R>(computation: Effectful<E, R>, handlers: ToplevelHandlers<E, R>): R {
   //@ts-ignore-next-line
   return run(handle(computation, handlers))
 }
@@ -51,7 +51,7 @@ export function unsafeRunSync<E extends Effects, R>(computation: Generator<E, R>
  * unsafeRunAsync(computationToRun, handlers)
  * ```
  */
-export function unsafeRunAsync<E extends Effects, R>(computation: Generator<E, R>, handlers: ToplevelHandlers<E, R>): Promise<R> {
+export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R>, handlers: ToplevelHandlers<E, R>): Promise<R> {
   function unsafeAsyncRunner(resumeValue: unknown): Promise<R> {
     return new Promise(resolve => {
       const raised = computation.next(resumeValue)
