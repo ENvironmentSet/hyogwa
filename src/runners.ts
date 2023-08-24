@@ -13,7 +13,7 @@ export { run } from './core'
  */
 type ToplevelHandlers<E extends Effects, R = never>
   = Simplify<
-  E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
+  E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
     Eq<P, never> extends false ?
       { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
       : { [K in S]: { [K in C]: ER } }
