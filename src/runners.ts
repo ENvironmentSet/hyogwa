@@ -1,4 +1,4 @@
-import { Effects, Code, HandleTactics, handle, run, Effectful } from './core';
+import { Effects, Code, HandleTactics, handle, run, Effectful, HandleError } from './core';
 import { Eq, Simplify } from './utils';
 
 export { run } from './core'
@@ -60,14 +60,21 @@ export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R
 
       const { construction, parameters } = raised.value
       const [ scope, constructorName ] = construction.split('.')
+      let isCodeHandled = false
 
       if (typeof handlers[scope]![constructorName] === 'function')
         handlers[scope]![constructorName](...parameters, {
           resume(value) {
+            if (isCodeHandled) throw new HandleError(raised.value, 'cannot call handle tactics more than once')
+
             resolve(unsafeAsyncRunner(value))
+            isCodeHandled = true
           },
           abort(value) {
+            if (isCodeHandled) throw new HandleError(raised.value, 'cannot call handle tactics more than once')
+
             resolve(value)
+            isCodeHandled = true
           }
         })
       else
