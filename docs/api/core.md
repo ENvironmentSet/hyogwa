@@ -70,6 +70,13 @@ Represents computation of result type `R` involving effects `E`.
 Note that it's strongly recommended to use `Effectful` type to type every effectful functions you define with generator 
 function declaration. Although types will be inferred correctly and smoothly, this habit will help you to read code easily.
 
+## `HandleTactics<ER, R = never>`
+
+- `ER` : evaluation result type of currently handled code (i.e. type of values which will be passed to `resume`)
+- `R` : result type of whole handling operation (i.e. type of values which will be passed to `abort`)
+
+Interface for handle tactics.
+
 ## `Handlers<E, R>`
 
 - `E` : effects to handle.
