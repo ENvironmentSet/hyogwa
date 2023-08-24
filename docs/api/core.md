@@ -60,9 +60,6 @@ const IO = createCodeConstructors<IO>('IO')
 Variable `IO` is object of type `{ read(): Effectful<IO, string>, write(text: string): Effectful<IO, void> }`. Here,
 you may think of `read` and `write` as primitive operations to introduce `IO` effect.
 
-> ⚠️ Caution: Be careful not to pass composed effect. Passing composed effect to `E` will cause behaviours not desired. 
-> This will be patched soon.
-
 ## `Effectful<E, R>`
 
 - `E` : effects that involved.
