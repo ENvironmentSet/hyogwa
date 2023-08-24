@@ -4,4 +4,4 @@
  * @packageDocumentation
  */
 
-export { Effect, Effects, createCodeConstructors, Effectful, Handlers, handle, run } from './core'
+export { Effect, Effects, createCodeConstructors, Effectful, HandleTactics, Handlers, handle, run } from './core'

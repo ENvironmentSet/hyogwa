@@ -200,12 +200,12 @@ export function createCodeConstructors<E extends Effects>(effectName: NameOfEffe
 /**
  * Interface for handle tactics
  *
- * @internal
+ * @beta
  *
  * @typeParam ER - Evaluation result type of currently handled code
- * @typeParam R - Result type of whole handling operation
+ * @typeParam R - Result type of whole handling operation (default type is `never`)
  */
-export interface HandleTactics<in ER, in R> {
+export interface HandleTactics<in ER, in R = never> {
   resume(value: ER): void
   abort(value: R): void
 }
