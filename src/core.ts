@@ -104,7 +104,7 @@ export type Effects = Code<string, unknown[], unknown>
  * }
  * ```
  */
-export type Effectful<E, R> = Generator<E, R>
+export interface Effectful<E extends Effects, R> extends Generator<E, R> {}
 
 /**
  * Constructs collection of code constructors for given effect
