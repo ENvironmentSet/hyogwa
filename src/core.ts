@@ -210,7 +210,7 @@ export interface HandleTactics<in ER, in R> {
  * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
  * Do not use this type to directly type something.
  *
- * @beta
+ * @internal
  *
  * @typeParam E - Effects to handle
  * @typeParam R - Result type of handling operation
@@ -223,16 +223,32 @@ export interface HandleTactics<in ER, in R> {
  * } satisfies Handlers<SomeEffect>
  * ```
  */
-export type Handlers<E extends Effects, R = never>
-  = Simplify<
-      UnionToIntersection<
-        E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
-          Eq<P, never> extends false ?
-            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Effectful<Effects, void> } }
-            : { [K in S]: { [K in C]: ER | Effectful<Effects, ER> } }
-          : never
-      >
+type _Handlers<E extends Effects, R>
+  = UnionToIntersection<
+      E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
+        Eq<P, never> extends false ?
+          { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Effectful<Effects, void> } }
+          : { [K in S]: { [K in C]: ER | Effectful<Effects, ER> } }
+        : never
     >
+
+/**
+ * Constructs type of value to handle given effects
+ *
+ * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
+ * Do not use this type to directly type something.
+ *
+ * @internal
+ *
+ * @privateRemarks
+ *
+ * Wrapped version of '_Handlers'. Use this instead of '_Handlers'.
+ *
+ * @typeParam E - Effects to handle
+ * @typeParam R - Result type of handling operation
+ */
+export type Handlers<E extends Effects, R = never>
+  = Simplify<_Handlers<E, R>>
 
 /**
  * An error class to represent errors happened while handling codes
