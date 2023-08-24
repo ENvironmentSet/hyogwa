@@ -18,9 +18,10 @@ export interface Code<C extends string, P extends unknown[], T> { // Here, unkno
 /**
  * Effect type constructor
  *
- * With the name and spec of the new effect, constructs type representing the effect
+ * With the name and spec of the new effect, constructs type representing the effect.
+ * Note that functions listed in the effect specification must not be generic(i.e. they must be monomorphic).
  *
- * @alpha
+ * @beta
  *
  * @typeParam N - The name of the new effect (a string literal type is expected)
  * @typeParam S - The specification of the new effect
@@ -54,7 +55,7 @@ export type Effect<N extends string, S extends {}>
  *
  * Only for constraining type parameters, do not use this type to directly type something.
  *
- * @alpha
+ * @beta
  *
  * @example Array#map for effectful functions
  *
@@ -67,9 +68,9 @@ export type Effect<N extends string, S extends {}>
  *   for (const element of array) {
  *     result.push(yield* f(element))
  *   }
- * }
  *
- * return result
+ *   return result
+ * }
  * ```
  */
 export type Effects = Code<string, unknown[], unknown>
@@ -83,7 +84,7 @@ export type Effects = Code<string, unknown[], unknown>
  *
  * NOTE: It's highly recommended to explicitly type every effectful function with this type.
  *
- * @alpha
+ * @beta
  *
  * @privateRemarks
  *
@@ -153,7 +154,7 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
 /**
  * Creates code constructors for given effect
  *
- * @alpha
+ * @beta
  *
  * @param effectName - the name of given effect
  * @returns code constructors for given effect
@@ -168,7 +169,6 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
  *   write(text: string): void
  * }>
  * const IO = createCodeConstructors<IO>('IO')
- *
  * ```
  */
 export function createCodeConstructors<E extends Effects>(effectName: NameOfEffect<E>): CodeConstructors<E> {
@@ -210,7 +210,7 @@ export interface HandleTactics<in ER, in R> {
  * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
  * Do not use this type to directly type something.
  *
- * @alpha
+ * @beta
  *
  * @typeParam E - Effects to handle
  * @typeParam R - Result type of handling operation
@@ -374,7 +374,7 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
  * Handle functions must call handle tactics exactly once before they terminate.
  * In addition, they must not have any implicit effects(effects weren't typed in their signature).
  *
- * @alpha
+ * @beta
  *
  * @param computation - Computation to resolve some effects
  * @param handlers - Handlers to handle some effects of given computation
@@ -417,49 +417,9 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (computation: Generator<E, R>, handlers: H)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
- * Handles effects of given computation via given handlers
+ * Overload for 'handle', nothing different except order of arguments are reversed.
  *
- * Handle functions must call handle tactics exactly once before they terminate.
- * In addition, they must not have any implicit effects(effects weren't typed in their signature).
- *
- * @alpha
- *
- * @param handlers - Handlers to handle some effects of given computation
- * @param computation - Computation to resolve some effects
- * @returns An effectful computation which effects that handled by 'H' are resolved
- *
- * @example Handling Exception
- *
- * ```typescript
- * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
- * import { Exception } from 'hyogwa/exception'
- *
- * type DivideByZero = Effect<'DivideByZero', Exception<void>>
- * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
- *
- * function* div(x, y): Effectful<DivideByZero, number> {
- *   if (y === 0) yield* DivideByZero.raise()
- *
- *   return x / y
- * }
- *
- * function main(): Effectful<never, number> {
- *   const result = yield* handle(
- *     div(1, 0),
- *     {
- *       DivideByZero: {
- *         raise(_, { abort }) {
- *           abort(NaN)
- *         }
- *       }
- *     }
- *   )
- *
- *   return result
- * }
- *
- * run(main())
- * ```
+ * @beta
  */
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (handlers: H, computation: Generator<E, R>)
@@ -470,7 +430,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * Handle functions must call handle tactics exactly once before they terminate.
  * In addition, they must not have any implicit effects(effects weren't typed in their signature).
  *
- * @alpha
+ * @beta
  *
  * @param handlers - Handlers to handle some effects of given computation
  * @param block - Function with no parameters, resulting effectful computation

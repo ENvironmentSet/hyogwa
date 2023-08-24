@@ -16,8 +16,7 @@
   "sideEffects": false,
   "scripts": {
     "typecheck": "tsc",
-    "generate-docs": "typedoc",
-    "prepare": "npm run typecheck; npm run generate-docs"
+    "prepare": "npm run typecheck"
   },
   "repository": {
     "type": "git",
@@ -38,7 +37,6 @@
   },
   "homepage": "https://github.com/ENvironmentSet/hyogwa#readme",
   "devDependencies": {
-    "typedoc": "^0.24.8",
     "typescript": "^5.1.6"
   }
 }

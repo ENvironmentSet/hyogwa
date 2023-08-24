@@ -1,7 +1,7 @@
 /**
  * Effect spec template for environment setting referencing effects (a.k.a. 'Reader')
  *
- * @alpha
+ * @beta
  *
  * @typeParam T - A type of value representing environment setting
  *

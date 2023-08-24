@@ -22,7 +22,7 @@ interface Suggestion<M extends string, T = never> {
  * - Inferences result type of the function
  * - Check whether the function is valid effectful function
  *
- * @alpha
+ * @beta
  *
  * @typeParam G - Type of effectful function to inspect
  *
@@ -62,7 +62,7 @@ export type InspectEffectfulFunction<G extends (...parameters: never) => Generat
  *
  * NOTE: If this utility produces 'never' type, then type of your handler is possibly broken seriously.
  *
- * @alpha
+ * @beta
  *
  * @typeParam C - Type of effectful computation to inspect
  * @typeParam H - Type of handlers

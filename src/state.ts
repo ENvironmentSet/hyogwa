@@ -1,7 +1,7 @@
 /**
  * Effect spec template for state effects.
  *
- * @alpha
+ * @beta
  *
  * @typeParam T - A type of state
  *
