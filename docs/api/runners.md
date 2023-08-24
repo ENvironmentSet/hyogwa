@@ -53,9 +53,9 @@ handlers must not raise explicit effects while handling process, and the handler
 after they terminate. Also, it's allowed to use `Promise` objects as they are plain values in the handlers.
 
 ```typescript
-import { unsafeRunSync } from 'hyogwa/runners'
+import { unsafeRunAsync } from 'hyogwa/runners'
 
-unsafeRunSync(main(), {
+unsafeRunAsync(main(), {
   API: {
     async getUserName({ resume }) {
       const res = await fetch(/** some api endpoint */)
