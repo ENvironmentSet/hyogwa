@@ -9,7 +9,7 @@ import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable } fr
  * @typeParam P - Types of code's parameters (a never type or tuple type is expected)
  * @typeParam T - Type of code represented
  */
-export interface Code<C extends string, P extends unknown[], T> { // Here, unknown[] means arbitrary-length tuple type
+export interface Code<C, P, T> { // Here, unknown[] means arbitrary-length tuple type
   construction: C
   parameters: P
   type: T // This field doesn't exist at runtime. Only for holding phantom type parameter 'T'
@@ -104,7 +104,7 @@ export type Effects = Code<string, unknown[], unknown>
  * }
  * ```
  */
-export interface Effectful<E extends Effects, R> extends Generator<E, R> {}
+export interface Effectful<E, R> extends Generator<E, R> {}
 
 /**
  * Constructs collection of code constructors for given effect
@@ -121,7 +121,7 @@ export interface Effectful<E extends Effects, R> extends Generator<E, R> {}
  */
 type _CodeConstructors<E extends Effects, E_ extends Effects>
   = UnionToIntersection<
-      E_ extends Code<`${infer _}.${infer C}`, infer P, infer R> ?
+      E_ extends Code<`${infer _}.${infer C}`, infer P extends unknown[], infer R> ?
         Eq<P, never> extends true ?
           { [K in C]: Effectful<E, R> }
           : { [K in C]: (...parameters: P) => Effectful<E, R> }
@@ -210,7 +210,7 @@ export interface HandleTactics<in ER, in R> {
  * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
  * Do not use this type to directly type something.
  *
- * @beta
+ * @internal
  *
  * @typeParam E - Effects to handle
  * @typeParam R - Result type of handling operation
@@ -223,16 +223,32 @@ export interface HandleTactics<in ER, in R> {
  * } satisfies Handlers<SomeEffect>
  * ```
  */
-export type Handlers<E extends Effects, R = never>
-  = Simplify<
-      UnionToIntersection<
-        E extends Code<`${infer S}.${infer C}`, infer P, infer ER> ?
-          Eq<P, never> extends false ?
-            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Effectful<Effects, void> } }
-            : { [K in S]: { [K in C]: ER | Effectful<Effects, ER> } }
-          : never
-      >
+type _Handlers<E extends Effects, R>
+  = UnionToIntersection<
+      E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
+        Eq<P, never> extends false ?
+          { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void | Effectful<Effects, void> } }
+          : { [K in S]: { [K in C]: ER | Effectful<Effects, ER> } }
+        : never
     >
+
+/**
+ * Constructs type of value to handle given effects
+ *
+ * Only for constraining type parameters or giving typescript hint (via 'satisfies' keyword) about handlers currently being defined.
+ * Do not use this type to directly type something.
+ *
+ * @internal
+ *
+ * @privateRemarks
+ *
+ * Wrapped version of '_Handlers'. Use this instead of '_Handlers'.
+ *
+ * @typeParam E - Effects to handle
+ * @typeParam R - Result type of handling operation
+ */
+export type Handlers<E extends Effects, R = never>
+  = Simplify<_Handlers<E, R>>
 
 /**
  * An error class to represent errors happened while handling codes
