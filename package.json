@@ -11,7 +11,8 @@
     "./exception": "./src/exception.ts",
     "./env": "./src/env.ts",
     "./state": "./src/state.ts",
-    "./log": "./src/log.ts"
+    "./log": "./src/log.ts",
+    "./async-task": "./src/async-task.ts"
   },
   "sideEffects": false,
   "scripts": {
