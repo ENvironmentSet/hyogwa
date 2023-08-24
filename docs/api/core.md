@@ -77,7 +77,7 @@ function declaration. Although types will be inferred correctly and smoothly, th
 
 Interface for handle tactics.
 
-## `Handlers<E, R>`
+## `Handlers<E, R = never>`
 
 - `E` : effects to handle.
 - `R` : type of handling computation's result
