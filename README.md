@@ -67,3 +67,7 @@ As an effect system, hyogwa solves the problem for you. Moreover, hyogwa has the
 - ⏳ Time-saving minimal interface: You can start writing code right after only learning **three functions** and **one type**.
 - 🧑‍💻 Advanced development experience: **Built-in coding assistant** is ready for you; it works without extra configuration.
 - 🔍 Type inference friendly design: TypeScript compiler will **infer almost every type** for you; hyogwa's design is not only easy for users but also for compilers.
+
+## Documents
+
+- [API](./tree/main/docs/api)
