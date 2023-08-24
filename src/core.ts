@@ -261,7 +261,7 @@ export type Handlers<E extends Effects, R = never>
  *
  * @internal
  */
-class HandleError extends Error {
+export class HandleError extends Error {
   /**
    * @param code - A code object that were being handled when error occurred
    * @param reason - The reason

@@ -1,4 +1,4 @@
-import { Effects, Code, HandleTactics, handle, run, Effectful } from './core';
+import { Effects, Code, HandleTactics, handle, run, Effectful, HandleError } from './core';
 import { Eq, Simplify } from './utils';
 
 export { run } from './core'
@@ -37,6 +37,15 @@ export function unsafeRunSync<E extends Effects, R>(computation: Effectful<E, R>
   return run(handle(computation, handlers))
 }
 
+type UnsafeToplevelAsyncHandlers<E extends Effects, R = never>
+  = Simplify<
+  E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
+    Eq<P, never> extends false ?
+      { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
+      : { [K in S]: { [K in C]: ER | Promise<ER> } }
+    : never
+>
+
 /**
  * Runs given computation asynchronously
  *
@@ -51,7 +60,7 @@ export function unsafeRunSync<E extends Effects, R>(computation: Effectful<E, R>
  * unsafeRunAsync(computationToRun, handlers)
  * ```
  */
-export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R>, handlers: ToplevelHandlers<E, R>): Promise<R> {
+export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R>, handlers: UnsafeToplevelAsyncHandlers<E, R>): Promise<R> {
   function unsafeAsyncRunner(resumeValue: unknown): Promise<R> {
     return new Promise(resolve => {
       const raised = computation.next(resumeValue)
@@ -60,18 +69,24 @@ export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R
 
       const { construction, parameters } = raised.value
       const [ scope, constructorName ] = construction.split('.')
+      let isCodeHandled = false
 
       if (typeof handlers[scope]![constructorName] === 'function')
         handlers[scope]![constructorName](...parameters, {
           resume(value) {
+            if (isCodeHandled) throw new HandleError(raised.value, 'cannot call handle tactics more than once')
+
             resolve(unsafeAsyncRunner(value))
+            isCodeHandled = true
           },
           abort(value) {
+            if (isCodeHandled) throw new HandleError(raised.value, 'cannot call handle tactics more than once')
+
             resolve(value)
+            isCodeHandled = true
           }
         })
-      else
-        resolve(unsafeAsyncRunner(handlers[scope]![constructorName]))
+      else resolve(Promise.resolve(handlers[scope]![constructorName]).then(unsafeAsyncRunner))
     })
   }
 
