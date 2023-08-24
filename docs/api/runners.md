@@ -41,7 +41,7 @@ unsafeRunSync(main(), {
 })
 ```
 
-## `unsafeRunAsync<E, R>(computation: Effectful<E, R>, handlers: ToplevelHandlers<E, R>): R`
+## `unsafeRunAsync<E, R>(computation: Effectful<E, R>, handlers: UnsafeToplevelAsyncHandlers<E, R>): R`
 
 - `E` : effects of the target computation.
 - `R` : type of the target computation's result.
@@ -50,21 +50,18 @@ unsafeRunSync(main(), {
 
 With the given handlers resolving every effect of the given computation, runs the given computation asynchronously. Given
 handlers must not raise explicit effects while handling process, and the handlers are allowed to call handle tactics 
-after they terminate.
+after they terminate. Also, it's allowed to use `Promise` objects as they are plain values in the handlers.
 
 ```typescript
 import { unsafeRunSync } from 'hyogwa/runners'
 
 unsafeRunSync(main(), {
   API: {
-    getUserName({ resume }) {
-      fetch(/** some api endpoint */)
-        .then(res =>
-          res.json()
-        )
-        .then(
-          ({ data: name }) => resume(name)
-        )
+    async getUserName({ resume }) {
+      const res = await fetch(/** some api endpoint */)
+      const { data: name } = await res.json()
+      
+      resume(name)
     }
   }
 })

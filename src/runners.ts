@@ -37,6 +37,15 @@ export function unsafeRunSync<E extends Effects, R>(computation: Effectful<E, R>
   return run(handle(computation, handlers))
 }
 
+type UnsafeToplevelAsyncHandlers<E extends Effects, R = never>
+  = Simplify<
+  E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
+    Eq<P, never> extends false ?
+      { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
+      : { [K in S]: { [K in C]: ER | Promise<ER> } }
+    : never
+>
+
 /**
  * Runs given computation asynchronously
  *
@@ -51,7 +60,7 @@ export function unsafeRunSync<E extends Effects, R>(computation: Effectful<E, R>
  * unsafeRunAsync(computationToRun, handlers)
  * ```
  */
-export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R>, handlers: ToplevelHandlers<E, R>): Promise<R> {
+export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R>, handlers: UnsafeToplevelAsyncHandlers<E, R>): Promise<R> {
   function unsafeAsyncRunner(resumeValue: unknown): Promise<R> {
     return new Promise(resolve => {
       const raised = computation.next(resumeValue)
@@ -77,8 +86,7 @@ export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R
             isCodeHandled = true
           }
         })
-      else
-        resolve(unsafeAsyncRunner(handlers[scope]![constructorName]))
+      else resolve(Promise.resolve(handlers[scope]![constructorName]).then(unsafeAsyncRunner))
     })
   }
 
