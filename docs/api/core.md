@@ -39,22 +39,22 @@ type `string`, another is of name `IO.write` taking `string` value resulting val
 Supertype of every effect. You may use this type to constraint type parameter to be any specific effect type.
 Also, it's possible to interpret this type as kind(type of type) of every effect representing types.
 
-## `createCodeConstructors<E>(name: NameOfEffect<E>): CodeConstructors<E>`
+## `createPrimitives<E>(name: NameOfEffect<E>): CodeConstructors<E>`
 
-- `E` : an effect to create code constructors.
+- `E` : an effect to create primitive operations.
 - `name` : name of the effect, a string literal expected.
 
-Create 'code constructors' for given effect `E` of name `name`. Code constructors are functions which create 
-representation of effectful computation. You may think of code constructors as primitive operations of an effect.
+Create 'primitive operations' for given effect `E` of name `name`. Code constructors are functions which create 
+representation of effectful computation.
 
 ```typescript
-import { Effect, createCodeConstructors } from 'hyogwa/core'
+import { Effect, createPrimitives } from 'hyogwa/core'
 
 type IO = Effect<'IO', {
   read(): string
   write(text: string): void
 }>
-const IO = createCodeConstructors<IO>('IO')
+const IO = createPrimitives<IO>('IO')
 ```
 
 Variable `IO` is object of type `{ read(): Effectful<IO, string>, write(text: string): Effectful<IO, void> }`. Here,
@@ -107,12 +107,12 @@ as last parameter of functions. Following handle tactics are available.
 - `abort(value: R): void` : Aborting the evaluation of given computation, make `value` result of the handling computation.
 
 ```typescript
-import { Effect, createCodeConstructors, Effectful, handle } from 'hyogwa/core'
+import { Effect, createPrimitives, Effectful, handle } from 'hyogwa/core'
 
 type Name = Effect<'Env', {
   get(): string
 }>
-const Name = createCodeConstructors<Name>('Name')
+const Name = createPrimitives<Name>('Name')
 
 function* main(): Effectful<Name, string> {
   const name = yield* Name.getEnv()

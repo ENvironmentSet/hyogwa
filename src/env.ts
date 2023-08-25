@@ -8,12 +8,12 @@
  * @example Reading userAgent
  *
  * ```typescript
- * import { Effect, createCodeConstructors, Effectful } from 'hyogwa/core'
+ * import { Effect, createPrimitives, Effectful } from 'hyogwa/core'
  * import { Env } from 'hyogwa/env'
  * import { unsafeRunSync } from 'hyogwa/runners'
  *
  * type UA = Effect<'UA', Env<string>>
- * const UA = createCodeConstructors<UA>('UA')
+ * const UA = createPrimitives<UA>('UA')
  *
  * function* main(): Effectful<UA, string> {
  *   return yield* UA.env

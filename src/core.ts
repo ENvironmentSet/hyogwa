@@ -107,7 +107,7 @@ export type Effects = Code<string, unknown[], unknown>
 export interface Effectful<E, R> extends Generator<E, R> {}
 
 /**
- * Constructs collection of code constructors for given effect
+ * Constructs collection of primitive operations for given effect
  *
  * @internal
  *
@@ -116,10 +116,10 @@ export interface Effectful<E, R> extends Generator<E, R> {}
  * For some reason, typescript narrows type assigned to type parameter when distributed union is involved.
  * 'E_' exists to protect 'E' from narrowing.
  *
- * @typeParam E - An effect to derive code constructors
+ * @typeParam E - An effect to derive primitive operations
  * @typeParam E_ - Same type as 'E'
  */
-type _CodeConstructors<E extends Effects, E_ extends Effects>
+type _Primitives<E extends Effects, E_ extends Effects>
   = UnionToIntersection<
       E_ extends Code<`${infer _}.${infer C}`, infer P extends unknown[], infer R> ?
         Eq<P, never> extends true ?
@@ -129,21 +129,21 @@ type _CodeConstructors<E extends Effects, E_ extends Effects>
     >
 
 /**
- * Constructs collection of code constructors for given effect
+ * Constructs collection of primitive operations for given effect
  *
  * @internal
  *
  * @privateRemarks
  *
- * Wrapped version of '_CodeConstructors'. Use this instead of '_CodeConstructors'.
+ * Wrapped version of '_Primitives'. Use this instead of '_Primitives'.
  *
- * @typeParam E - An effect to derive code constructors
+ * @typeParam E - An effect to derive primitive operations
  */
-type CodeConstructors<E extends Effects>
+type Primitives<E extends Effects>
   = Simplify<
       NameOfEffect<E> extends infer N ?
         Eq<UnionToIntersection<N>, never> extends false ?
-          _CodeConstructors<E, E>
+          _Primitives<E, E>
           : never
         : never
     >
@@ -158,26 +158,26 @@ type CodeConstructors<E extends Effects>
 export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer N}.${infer _}` ? N : never
 
 /**
- * Creates code constructors for given effect
+ * Creates primitive operations for given effect
  *
  * @beta
  *
  * @param effectName - the name of given effect
- * @returns code constructors for given effect
+ * @returns primitive operations for given effect
  *
  * @example Defining IO Effect
  *
  * ```typescript
- * import { Effect, createCodeConstructors } from 'hyogwa/core'
+ * import { Effect, createPrimitives } from 'hyogwa/core'
  *
  * type IO = Effect<'IO', {
  *   read(): string
  *   write(text: string): void
  * }>
- * const IO = createCodeConstructors<IO>('IO')
+ * const IO = createPrimitives<IO>('IO')
  * ```
  */
-export function createCodeConstructors<E extends Effects>(effectName: NameOfEffect<E>): CodeConstructors<E> {
+export function createPrimitives<E extends Effects>(effectName: NameOfEffect<E>): Primitives<E> {
   return new Proxy({}, {
     get(_, constructorName: string) {
       //@ts-ignore-next-line
@@ -194,7 +194,7 @@ export function createCodeConstructors<E extends Effects>(effectName: NameOfEffe
 
       return constructor
     }
-  }) as CodeConstructors<E>
+  }) as Primitives<E>
 }
 
 /**
@@ -405,11 +405,11 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
  * @example Handling Exception
  *
  * ```typescript
- * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
+ * import { Effect, createPrimitives, Effectful, handle, run } from 'hyogwa/core'
  * import { Exception } from 'hyogwa/exception'
  *
  * type DivideByZero = Effect<'DivideByZero', Exception<void>>
- * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
+ * const DivideByZero = createPrimitives<DivideByZero>('DivideByZero')
  *
  * function* div(x, y): Effectful<DivideByZero, number> {
  *   if (y === 0) yield* DivideByZero.raise()
@@ -461,11 +461,11 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * @example Handling Exception
  *
  * ```typescript
- * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
+ * import { Effect, createPrimitives, Effectful, handle, run } from 'hyogwa/core'
  * import { Exception } from 'hyogwa/exception'
  *
  * type DivideByZero = Effect<'DivideByZero', Exception<void>>
- * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
+ * const DivideByZero = createPrimitives<DivideByZero>('DivideByZero')
  *
  * function* div(x, y): Effectful<DivideByZero, number> {
  *   if (y === 0) yield* DivideByZero.raise()

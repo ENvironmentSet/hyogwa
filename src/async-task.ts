@@ -1,4 +1,4 @@
-import { createCodeConstructors, Effect, Effectful, HandleTactics } from './core';
+import { createPrimitives, Effect, Effectful, HandleTactics } from './core';
 import { unsafeRunAsync } from './runners';
 
 /**
@@ -11,7 +11,7 @@ import { unsafeRunAsync } from './runners';
 export type AsyncTask<R = unknown> = Effect<'AsyncTask', {
   wait(promise: Promise<R>): R
 }>
-const _AsyncTask = <R>() => createCodeConstructors<AsyncTask<R>>('AsyncTask')
+const _AsyncTask = <R>() => createPrimitives<AsyncTask<R>>('AsyncTask')
 export const AsyncTask = {
   /**
    * 'await' in hyogwa's style
