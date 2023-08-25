@@ -9,12 +9,12 @@ Module for logging effects (a.k.a. 'Writer').
 Effect spec template for logging effects (a.k.a. 'Writer').
 
 ```typescript
-import { Effect, createCodeConstructors, Effectful } from 'hyogwa/core'
+import { Effect, createPrimitives, Effectful } from 'hyogwa/core'
 import { Log } from 'hyogwa/log'
 import { unsafeRunSync } from 'hyogwa/runners'
 
 type Console = Effect<'Console', Log<string>>
-const Console = createCodeConstructors<Console>('Console')
+const Console = createPrimitives<Console>('Console')
 
 function* main(): Effectful<Console, void> {
   yield* Console.log('HI!')

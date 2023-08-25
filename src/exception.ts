@@ -1,4 +1,4 @@
-import { createCodeConstructors, Effect, Handlers } from './core';
+import { createPrimitives, Effect, Handlers } from './core';
 
 /**
  * Effect spec template for exception effects (similar to 'Either' or 'Result' monads)
@@ -10,11 +10,11 @@ import { createCodeConstructors, Effect, Handlers } from './core';
  * @example Setting 'NaN' as fallback for division
  *
  * ```typescript
- * import { Effect, createCodeConstructors, Effectful, handle, run } from 'hyogwa/core'
+ * import { Effect, createPrimitives, Effectful, handle, run } from 'hyogwa/core'
  * import { Exception } from 'hyogwa/exception'
  *
  * type DivideByZero = Effect<'DivideByZero', Exception<void>>
- * const DivideByZero = createCodeConstructors<DivideByZero>('DivideByZero')
+ * const DivideByZero = createPrimitives<DivideByZero>('DivideByZero')
  *
  * function* div(x, y): Effectful<DivideByZero, number> {
  *   if (y === 0) yield* DivideByZero.raise()
@@ -55,7 +55,7 @@ export type SimpleException = Effect<'SimpleException', Exception<string | void>
  *
  * @beta
  */
-export const SimpleException = createCodeConstructors<SimpleException>('SimpleException')
+export const SimpleException = createPrimitives<SimpleException>('SimpleException')
 /**
  * Unsafe handlers for 'SimpleException'
  *

@@ -1,7 +1,7 @@
 # hyogwa — Natural 🌿 effect system that fits TypeScript
 
 ```typescript
-import { Effect, createCodeConstructors } from 'hyogwa/core';
+import { Effect, createPrimitives } from 'hyogwa/core';
 import { unsafeRunSync } from 'hyogwa/runners';
 
 // Define own IO effect
@@ -10,7 +10,7 @@ type IO = Effect<'IO', {
   read(): string
   write(text: string): void
 }>
-const IO = createCodeConstructors<IO>('IO')
+const IO = createPrimitives<IO>('IO')
 
 // Write a function with IO effect
 
