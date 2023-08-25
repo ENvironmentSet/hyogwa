@@ -2,6 +2,7 @@
 
 - [`hyogwa/core`](./core.md)
 - [`hyogwa/runners`](./runners.md)
+- [`hyogwa/with-handler`](./with-handler.md)
 - [`hyogwa/monad`](./monad.md)
 - [`hyogwa/assistants`](./assistants.md)
 - [`hyogwa/async-task`](./async-task.md)
