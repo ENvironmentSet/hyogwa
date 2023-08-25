@@ -70,6 +70,9 @@ Represents computation of result type `R` involving effects `E`.
 Note that it's strongly recommended to use `Effectful` type to type every effectful functions you define with generator 
 function declaration. Although types will be inferred correctly and smoothly, this habit will help you to read code easily.
 
+> **⚠️ CAUTION**: Evaluating the same effectful computation multiple times will produce unsound result. Have your code 
+> run(via `yield*`, `handle` or runners) effectful computations only once per instance.
+
 ## `HandleTactics<ER, R = never>`
 
 - `ER` : evaluation result type of currently handled code (i.e. type of values which will be passed to `resume`)
