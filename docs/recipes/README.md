@@ -3,13 +3,13 @@
 ## Defining new effects
 
 ```typescript
-import { Effect, createCodeConstructors } from 'hyogwa/core'
+import { Effect, createPrimitives } from 'hyogwa/core'
 
 type IO = Effect<'IO', {
   read(): string
   write(text: string)
 }>
-const IO = createCodeConstructors<IO>('IO')
+const IO = createPrimitives<IO>('IO')
 ```
 
 You'll have:
@@ -25,23 +25,23 @@ effects by themselves -- of the new effect.
 If your effect have constant functions as primitive operations like blow:
 
 ```typescript
-import { Effect, createCodeConstructors } from 'hyogwa/core'
+import { Effect, createPrimitives } from 'hyogwa/core'
 
 type Config = Effect<'Config', {
   getMode(): 'dev' | 'prod'
 }>
-const Config = createCodeConstructors<Config>('Config')
+const Config = createPrimitives<Config>('Config')
 ```
 
 You may shorten the code like this:
 
 ```typescript
-import { Effect, createCodeConstructors } from 'hyogwa/core'
+import { Effect, createPrimitives } from 'hyogwa/core'
 
 type Config = Effect<'Config', {
   mode: 'dev' | 'prod'
 }>
-const Config = createCodeConstructors<Config>('Config')
+const Config = createPrimitives<Config>('Config')
 ```
 
 However, the `read` operation in previous example can't be shortened like this for now. Since it's not constant function.
@@ -52,11 +52,11 @@ Effect specification templates are generic types(type constructors) that produce
 Hyogwa has modules of effects specification for general effects.
 
 ```typescript
-import { Effect, createCodeConstructors } from 'hyogwa/core'
+import { Effect, createPrimitives } from 'hyogwa/core'
 import { Exception } from 'hyogwa/exeption'
 
 type MyExeption = Effect<'MyException', Exception<string>>
-const MyExeption = createCodeConstructors<MyExeption>('MyExeption')
+const MyExeption = createPrimitives<MyExeption>('MyExeption')
 ```
 
 ### Combining multiple effects
@@ -72,13 +72,13 @@ type CombinedEffect = IO | Config | MyException
 If your effect's primitive operation has to be polymorphic over something. You can do it like blow:
 
 ```typescript
-import { createCodeConstructors, Effect, Effectful, HandleTactics } from 'hyogwa/core';
+import { createPrimitives, Effect, Effectful, HandleTactics } from 'hyogwa/core';
 import { unsafeRunAsync } from 'hyogwa/runners';
 
 export type AsyncTask<R = unknown> = Effect<'AsyncTask', {
   wait(promise: Promise<R>): R
 }>
-const _AsyncTask = <R>() => createCodeConstructors<AsyncTask<R>>('AsyncTask')
+const _AsyncTask = <R>() => createPrimitives<AsyncTask<R>>('AsyncTask')
 const AsyncTask = {
   * wait<R>(promise: Promise<R>): Effectful<AsyncTask<R>, R> {
     return yield* _AsyncTask<R>().wait(promise)
@@ -176,7 +176,7 @@ function* map<T, U, E extends Effects>(array: T[], f: (x: T) => Effectful<E, U>)
 You can handle effects of the computation thus remove(resolve) them from the type.
 
 ```typescript
-import { Effect, createCodeConstructors, Effectful, handle } from 'hyogwa/core'
+import { Effect, createPrimitives, Effectful, handle } from 'hyogwa/core'
 
 type Exception = Effect<'Exception', {
   raise(reason: string): never
@@ -214,12 +214,12 @@ operation. Note that you must call one of these handle tactics exactly once befo
 ### Handle constant functions written in shorthand style
 
 ```typescript
-import { Effect, createCodeConstructors, handle } from 'hyogwa/core'
+import { Effect, createPrimitives, handle } from 'hyogwa/core'
 
 type Config = Effect<'Config', {
   mode: 'dev' | 'prod'
 }>
-const Config = createCodeConstructors<Config>('Config')
+const Config = createPrimitives<Config>('Config')
 
 function* someFunction() {
   const mode = yield* Config.mode
@@ -245,12 +245,12 @@ function* main() {
 Handle functions can have effects.
 
 ```typescript
-import { Effect, createCodeConstructors, handle } from 'hyogwa/core'
+import { Effect, createPrimitives, handle } from 'hyogwa/core'
 
 type Config = Effect<'Config', {
   getMode(): 'dev' | 'prod'
 }>
-const Config = createCodeConstructors<Config>('Config')
+const Config = createPrimitives<Config>('Config')
 
 function* someFunction() {
   const mode = yield* Config.getMode()
