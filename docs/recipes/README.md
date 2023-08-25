@@ -75,7 +75,7 @@ If your effect's primitive operation has to be polymorphic over something. You c
 import { createPrimitives, Effect, Effectful, HandleTactics } from 'hyogwa/core';
 import { unsafeRunAsync } from 'hyogwa/runners';
 
-export type AsyncTask<R = unknown> = Effect<'AsyncTask', {
+type AsyncTask<R = unknown> = Effect<'AsyncTask', {
   wait(promise: Promise<R>): R
 }>
 const _AsyncTask = <R>() => createPrimitives<AsyncTask<R>>('AsyncTask')
