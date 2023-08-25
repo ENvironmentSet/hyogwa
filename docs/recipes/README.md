@@ -7,7 +7,7 @@ import { Effect, createPrimitives } from 'hyogwa/core'
 
 type IO = Effect<'IO', {
   read(): string
-  write(text: string)
+  write(text: string): void
 }>
 const IO = createPrimitives<IO>('IO')
 ```
