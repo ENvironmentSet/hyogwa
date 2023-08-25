@@ -103,10 +103,3 @@ export function chain<E, A, B>(f: (a: A) => Effectful<E, B>, computation?: Effec
     return yield* f(a)
   })()
 }
-
-export const effectful = {
-  map,
-  of,
-  ap,
-  chain
-}
