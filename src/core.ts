@@ -495,7 +495,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
   (handlers: H, block: () => Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
-  (first: Effectful<E, R> | H, second: H | Effectful<E, R> | (() => Effectful<E, R>) )
+  (first: Effectful<E, R> | H, second: H | Effectful<E, R> | (() => Effectful<E, R>))
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
     if (isGenerator(first)) return _handle(first, second as H)
     else if (isGenerator(second)) return _handle(second, first as H)
