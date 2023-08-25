@@ -244,7 +244,7 @@ function* someFunction() {
   const mode = yield* Config.mode
   
   if (mode === 'dev') yield* IO.write('we are on dev mode now')
-  else if (mode === 'dev') yield* IO.write('we are on prod mode now')
+  else if (mode === 'prod') yield* IO.write('we are on prod mode now')
 }
 
 const main = withHandler(someFunction, {
@@ -270,7 +270,7 @@ function* someFunction() {
   const mode = yield* Config.getMode()
   
   if (mode === 'dev') yield* IO.write('we are on dev mode now')
-  else if (mode === 'dev') yield* IO.write('we are on prod mode now')
+  else if (mode === 'prod') yield* IO.write('we are on prod mode now')
 }
 
 function* main() {
