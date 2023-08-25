@@ -13,7 +13,8 @@
     "./state": "./src/state.ts",
     "./log": "./src/log.ts",
     "./async-task": "./src/async-task.ts",
-    "./monad": "./src/monad.ts"
+    "./monad": "./src/monad.ts",
+    "./with-handler": "./src/with-handler.ts"
   },
   "sideEffects": false,
   "scripts": {
