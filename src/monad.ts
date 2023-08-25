@@ -1,7 +1,7 @@
 import { Effectful } from './core';
 
 /**
- * Applies function to result of a computation.
+ * Applies function to result of a computation
  *
  * @beta
  *
@@ -38,7 +38,7 @@ export function* of<T>(value: T): Effectful<never, T> {
 }
 
 /**
- * Applies function inside effectful computation to result of another computation.
+ * Applies function inside effectful computation to result of another computation
  *
  * @beta
  *
@@ -47,12 +47,12 @@ export function* of<T>(value: T): Effectful<never, T> {
  */
 export function ap<E, A, B>(wrappedF: Effectful<E, (a: A) => B>, computation: Effectful<E, A>): Effectful<E, B>
 /**
- * Unwrap function inside effectful computation as function for effectful computations.
+ * Unwrap function inside effectful computation as function for effectful computations
  *
  * @beta
  *
  * @param wrappedF - A function to unwrap
- * @returns an unwrapped function for effectful computations.
+ * @returns an unwrapped function for effectful computations
  */
 export function ap<E1, A, B>(wrappedF: Effectful<E1, (a: A) => B>)
   : <E2>(computation: Effectful<E2, A>) => Effectful<E1 | E2, B>
