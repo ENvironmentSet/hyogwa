@@ -328,7 +328,7 @@ export type ExcludeHandledEffects<E extends Effects, H>
  * @param computation - Computation to resolve some effects
  * @param handlers - Handlers to handle some effects of given computation
  */
-function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
+function* _handle<E extends Effects, R, const H extends Partial<Handlers<E, R>>>(computation: Effectful<E, R>, handlers: H)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
   let raised = computation.next()
   let result: R
@@ -435,7 +435,7 @@ function* _handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>(compu
  * run(main())
  * ```
  */
-export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+export function handle<E extends Effects, R, const H extends Partial<Handlers<E, R>>>
   (computation: Effectful<E, R>, handlers: H)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
@@ -443,7 +443,7 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  *
  * @beta
  */
-export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+export function handle<E extends Effects, R, const H extends Partial<Handlers<E, R>>>
   (handlers: H, computation: Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
 /**
@@ -491,10 +491,10 @@ export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
  * run(main())
  * ```
  */
-export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+export function handle<E extends Effects, R, const H extends Partial<Handlers<E, R>>>
   (handlers: H, block: () => Effectful<E, R>)
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R>
-export function handle<E extends Effects, R, H extends Partial<Handlers<E, R>>>
+export function handle<E extends Effects, R, const H extends Partial<Handlers<E, R>>>
   (first: Effectful<E, R> | H, second: H | Effectful<E, R> | (() => Effectful<E, R>))
   : Effectful<ExcludeHandledEffects<E, H> | UsedEffectsInHandlers<H>, R> {
     if (isGenerator(first)) return _handle(first, second as H)
