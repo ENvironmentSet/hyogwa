@@ -53,10 +53,10 @@ Hyogwa has modules of effects specification for general effects.
 
 ```typescript
 import { Effect, createPrimitives } from 'hyogwa/core'
-import { Exception } from 'hyogwa/exeption'
+import { Exception } from 'hyogwa/exception'
 
-type MyExeption = Effect<'MyException', Exception<string>>
-const MyExeption = createPrimitives<MyExeption>('MyExeption')
+type MyException = Effect<'MyException', Exception<string>>
+const MyException = createPrimitives<MyExeption>('MyException')
 ```
 
 ### Combining multiple effects
