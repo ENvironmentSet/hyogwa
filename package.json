@@ -12,7 +12,8 @@
     "./env": "./src/env.ts",
     "./state": "./src/state.ts",
     "./log": "./src/log.ts",
-    "./async-task": "./src/async-task.ts"
+    "./async-task": "./src/async-task.ts",
+    "./monad": "./src/monad.ts"
   },
   "sideEffects": false,
   "scripts": {
