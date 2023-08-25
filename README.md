@@ -71,3 +71,4 @@ As an effect system, hyogwa solves the problem for you. Moreover, hyogwa has the
 ## Documents
 
 - [API](./docs/api)
+- [Recipes](./docs/recipes)
