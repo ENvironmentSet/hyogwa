@@ -181,6 +181,7 @@ import { Effect, createPrimitives, Effectful, handle } from 'hyogwa/core'
 type Exception = Effect<'Exception', {
   raise(reason: string): never
 }>
+const Exception = createPrimitives<Exception>('Exception')
 
 function* div(x: number, y: number): Effectful<Exception, number> {
   if (y === 0) return yield* Exception.raise('Cannot divide number by zero.') // or you may use the 'absurd' function here.
