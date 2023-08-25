@@ -211,10 +211,28 @@ are two handle tactics available now. `resume(value)` resumes the execution of t
 value `value`. `abort(value)` aborts currently handled effectful computation and set `value` as result of total `handle`
 operation. Note that you must call one of these handle tactics exactly once before they terminate(finish to execute).
 
+### Handling effects in effectful functions
+
+You can handle effects in effectful function without calling it.
+
+```typescript
+import { withHandler } from 'hyogwa/with-handler'
+
+const div2 = withHandler(div, {
+  Exception: {
+    raise(reason, { abort }) {
+      console.error(reason) // just for debugging
+      abort(NaN)
+    }
+  }
+})
+```
+
 ### Handle constant functions written in shorthand style
 
 ```typescript
-import { Effect, createPrimitives, handle } from 'hyogwa/core'
+import { Effect, createPrimitives } from 'hyogwa/core'
+import { withHandler } from 'hyogwa/with-handler'
 
 type Config = Effect<'Config', {
   mode: 'dev' | 'prod'
@@ -228,16 +246,11 @@ function* someFunction() {
   else if (mode === 'dev') yield* IO.write('we are on prod mode now')
 }
 
-function* main() {
-  return yield* handle(
-    someFunction(),
-    {
-      Config: {
-        mode: 'dev'
-      }
-    }
-  )
-}
+const main = withHandler(someFunction, {
+  Config: {
+    mode: 'dev'
+  }
+})
 ```
 
 ### Handle functions with effects
