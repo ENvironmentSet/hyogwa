@@ -1,5 +1,5 @@
 import { Effects, Code, HandleTactics, handle, run, Effectful, HandleError } from './core';
-import { Eq, Simplify } from './utils';
+import { Eq, Simplify, UnionToIntersection } from './utils';
 
 export { run } from './core'
 
@@ -13,11 +13,13 @@ export { run } from './core'
  */
 type ToplevelHandlers<E extends Effects, R = never>
   = Simplify<
-  E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
-    Eq<P, never> extends false ?
-      { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
-      : { [K in S]: { [K in C]: ER } }
-    : never
+      UnionToIntersection<
+        E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
+          Eq<P, never> extends false ?
+            { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
+            : { [K in S]: { [K in C]: ER } }
+          : never
+      >
 >
 
 /**
@@ -39,11 +41,13 @@ export function unsafeRunSync<E extends Effects, R>(computation: Effectful<E, R>
 
 type UnsafeToplevelAsyncHandlers<E extends Effects, R = never>
   = Simplify<
-  E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
-    Eq<P, never> extends false ?
-      { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
-      : { [K in S]: { [K in C]: ER | Promise<ER> } }
-    : never
+  UnionToIntersection<
+    E extends Code<`${infer S}.${infer C}`, infer P extends unknown[], infer ER> ?
+      Eq<P, never> extends false ?
+        { [K in S]: { [K in C]: (...parameters: [...P, HandleTactics<ER, R>]) => void } }
+        : { [K in S]: { [K in C]: Promise<ER> } }
+      : never
+  >
 >
 
 /**
@@ -71,22 +75,25 @@ export function unsafeRunAsync<E extends Effects, R>(computation: Effectful<E, R
       const [ scope, constructorName ] = construction.split('.')
       let isCodeHandled = false
 
-      if (typeof handlers[scope]![constructorName] === 'function')
-        handlers[scope]![constructorName](...parameters, {
-          resume(value) {
+      //@ts-ignore-next-line
+      if (typeof handlers[scope][constructorName] === 'function')
+        //@ts-ignore-next-line
+        handlers[scope][constructorName](...parameters, {
+          resume(value: unknown) {
             if (isCodeHandled) throw new HandleError(raised.value, 'cannot call handle tactics more than once')
 
             resolve(unsafeAsyncRunner(value))
             isCodeHandled = true
           },
-          abort(value) {
+          abort(value: R) {
             if (isCodeHandled) throw new HandleError(raised.value, 'cannot call handle tactics more than once')
 
             resolve(value)
             isCodeHandled = true
           }
         })
-      else resolve(Promise.resolve(handlers[scope]![constructorName]).then(unsafeAsyncRunner))
+      //@ts-ignore-next-line
+      else resolve(Promise.resolve(handlers[scope][constructorName]).then(unsafeAsyncRunner))
     })
   }
 
