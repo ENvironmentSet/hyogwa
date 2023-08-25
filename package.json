@@ -1,6 +1,6 @@
 {
   "name": "hyogwa",
-  "version": "0.0.0-beta.0",
+  "version": "0.1.0-rc.1",
   "description": "Natural 🌿 effect system that fits TypeScript",
   "type": "module",
   "exports": {
