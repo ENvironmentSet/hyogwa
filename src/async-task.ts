@@ -1,4 +1,4 @@
-import { createPrimitives, Effect, Effectful, HandleTactics } from './core';
+import { Effect, Effectful, HandleTactics, createPrimitive } from './core';
 import { unsafeRunAsync } from './runners';
 
 /**
@@ -11,7 +11,6 @@ import { unsafeRunAsync } from './runners';
 export type AsyncTask<R = unknown> = Effect<'AsyncTask', {
   wait(promise: Promise<R>): R
 }>
-const _AsyncTask = <R>() => createPrimitives<AsyncTask<R>>('AsyncTask')
 export const AsyncTask = {
   /**
    * 'await' in hyogwa's style
@@ -21,9 +20,7 @@ export const AsyncTask = {
    * @typeParam R - result type of asynchronous task
    * @param promise - a promise to way
    */
-  * wait<R>(promise: Promise<R>): Effectful<AsyncTask<R>, R> {
-    return yield* _AsyncTask<R>().wait(promise)
-  }
+  wait: createPrimitive('AsyncTask', 'wait') as <R>(promise: Promise<R>) => Effectful<AsyncTask<R>, R>
 }
 
 /**

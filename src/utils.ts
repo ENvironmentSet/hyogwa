@@ -83,3 +83,15 @@ export function isGenerator(value: unknown): value is Generator {
     && typeof value.throw === 'function'
   )
 }
+
+/**
+ * Utility function to define function with name
+ *
+ * @param f - A function to define name
+ * @param name - A name for function
+ */
+export function withName<F extends Function>(f: F, name: string): F {
+  Reflect.defineProperty(f, 'name', { value: name })
+
+  return f
+}
