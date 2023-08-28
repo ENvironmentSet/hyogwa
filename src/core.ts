@@ -157,6 +157,14 @@ type Primitives<E extends Effects>
  */
 export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer N}.${infer _}` ? N : never
 
+/**
+ * Create primitive operation
+ *
+ * @internal
+ *
+ * @param effectName
+ * @param constructorName
+ */
 function createPrimitive(effectName: string, constructorName: string) {
   const primitive = withName((...parameters: unknown[]) => {
     let isCalled = false
