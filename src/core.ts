@@ -1,4 +1,4 @@
-import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable } from './utils';
+import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable, withName } from './utils';
 
 /**
  * Constructor for types of values representing code
@@ -157,6 +157,46 @@ type Primitives<E extends Effects>
  */
 export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer N}.${infer _}` ? N : never
 
+function createPrimitive(effectName: string, constructorName: string) {
+  const primitive = withName((...parameters: unknown[]) => {
+    let isCalled = false
+    let isTerminated = false
+    const iterator: IterableIterator<unknown> = {
+      next(...resolution: unknown[]) {
+        if (isTerminated) return { value: void 0, done: true }
+        else if (isCalled) {
+          isTerminated = true
+          return { value: resolution, done: true }
+        } else {
+          isCalled = true
+          return { value: { construction: `${effectName}.${constructorName}`, parameters }, done: false }
+        }
+      },
+
+      return(value: unknown) {
+        isTerminated = true
+        return { value, done: true }
+      },
+
+      throw(e: unknown) {
+        isTerminated = true
+        throw e
+      },
+
+      [Symbol.iterator]() {
+        return iterator
+      }
+    }
+
+    return iterator
+  }, constructorName)
+
+  //@ts-ignore-next-line
+  primitive[Symbol.iterator] = primitive
+
+  return primitive
+}
+
 /**
  * Creates primitive operations for given effect
  *
@@ -180,19 +220,7 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
 export function createPrimitives<E extends Effects>(effectName: NameOfEffect<E>): Primitives<E> {
   return new Proxy({}, {
     get(_, constructorName: string) {
-      //@ts-ignore-next-line
-      const constructor = function* (...parameters) {
-        //@ts-ignore-next-line
-        return yield { construction: `${effectName}.${constructorName}`, parameters }
-      }
-
-      //@ts-ignore-next-line
-      constructor[Symbol.iterator] = function* () {
-        //@ts-ignore-next-line
-        return yield { construction: `${effectName}.${constructorName}` }
-      }
-
-      return constructor
+      return createPrimitive(effectName, constructorName)
     }
   }) as Primitives<E>
 }
