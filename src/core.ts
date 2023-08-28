@@ -165,7 +165,7 @@ export type NameOfEffect<E extends Effects> = E['construction'] extends `${infer
  * @param effectName
  * @param constructorName
  */
-function createPrimitive(effectName: string, constructorName: string) {
+export function createPrimitive(effectName: string, constructorName: string) {
   const primitive = withName((...parameters: unknown[]) => {
     let isCalled = false
     let isTerminated = false
