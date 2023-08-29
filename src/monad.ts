@@ -1,4 +1,4 @@
-import { Effectful } from './core';
+import { Effectful } from './core.js';
 
 /**
  * Applies function to result of a computation

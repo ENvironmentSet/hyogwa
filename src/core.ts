@@ -1,4 +1,4 @@
-import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable, withName } from './utils';
+import { Eq, UnionToIntersection, Delay, Simplify, isGenerator, Unreachable, withName } from './utils.js';
 
 /**
  * Constructor for types of values representing code

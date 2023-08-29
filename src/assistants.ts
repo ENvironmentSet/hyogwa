@@ -1,5 +1,5 @@
-import { Eq, Unreachable } from './utils';
-import { Effects, Handlers, NameOfEffect, ExcludeHandledEffects, UsedEffectsInHandlers, Effectful } from './core';
+import { Eq, Unreachable } from './utils.js';
+import { Effects, Handlers, NameOfEffect, ExcludeHandledEffects, UsedEffectsInHandlers, Effectful } from './core.js';
 
 /**
  * Type constructor constructing message representing type

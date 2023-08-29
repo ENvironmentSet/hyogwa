@@ -4,4 +4,4 @@
  * @packageDocumentation
  */
 
-export { Effect, Effects, createPrimitives, Effectful, HandleTactics, Handlers, handle, run } from './core'
+export { Effect, Effects, createPrimitives, Effectful, HandleTactics, Handlers, handle, run } from './core.js'
