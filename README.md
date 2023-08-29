@@ -74,8 +74,6 @@ As an effect system, hyogwa solves the problem for you. Moreover, hyogwa has the
 npm i hyogwa
 ```
 
-> **📝 NOTE**: Hyogwa is intended to be used with bundlers.
-
 ## Documents
 
 - [API](./docs/api)
