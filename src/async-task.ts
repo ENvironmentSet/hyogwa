@@ -1,5 +1,5 @@
-import { Effect, Effectful, HandleTactics, createPrimitive } from './core';
-import { unsafeRunAsync } from './runners';
+import { Effect, Effectful, HandleTactics, createPrimitive } from './core.js';
+import { unsafeRunAsync } from './runners.js';
 
 /**
  * Effect for computations rely on asynchronous tasks

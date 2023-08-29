@@ -1,4 +1,4 @@
-import { createPrimitives, Effect, Handlers } from './core';
+import { createPrimitives, Effect, Handlers } from './core.js';
 
 /**
  * Effect spec template for exception effects (similar to 'Either' or 'Result' monads)

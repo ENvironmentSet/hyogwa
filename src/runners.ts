@@ -1,7 +1,7 @@
-import { Effects, Code, HandleTactics, handle, run, Effectful, HandleError } from './core';
-import { Eq, Simplify, UnionToIntersection } from './utils';
+import { Effects, Code, HandleTactics, handle, run, Effectful, HandleError } from './core.js';
+import { Eq, Simplify, UnionToIntersection } from './utils.js';
 
-export { run } from './core'
+export { run } from './core.js'
 
 /**
  * Constructs type for handlers used at top level

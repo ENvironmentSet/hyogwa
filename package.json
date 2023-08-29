@@ -4,22 +4,22 @@
   "description": "Natural 🌿 effect system that fits TypeScript",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./core": "./src/index.ts",
-    "./runners": "./src/runners.ts",
-    "./assistant": "./src/assistants.ts",
-    "./exception": "./src/exception.ts",
-    "./env": "./src/env.ts",
-    "./state": "./src/state.ts",
-    "./log": "./src/log.ts",
-    "./async-task": "./src/async-task.ts",
-    "./monad": "./src/monad.ts",
-    "./with-handler": "./src/with-handler.ts"
+    ".": "./dist/index.js",
+    "./core": "./dist/index.js",
+    "./runners": "./dist/runners.js",
+    "./assistant": "./dist/assistants.js",
+    "./exception": "./dist/exception.js",
+    "./env": "./dist/env.js",
+    "./state": "./dist/state.js",
+    "./log": "./dist/log.js",
+    "./async-task": "./dist/async-task.js",
+    "./monad": "./dist/monad.js",
+    "./with-handler": "./dist/with-handler.js"
   },
   "sideEffects": false,
   "scripts": {
-    "typecheck": "tsc",
-    "prepare": "npm run typecheck"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",

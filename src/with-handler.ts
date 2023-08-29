@@ -1,4 +1,4 @@
-import { Effectful, Effects, ExcludeHandledEffects, handle, Handlers, UsedEffectsInHandlers } from './core'
+import { Effectful, Effects, ExcludeHandledEffects, handle, Handlers, UsedEffectsInHandlers } from './core.js'
 
 /**
  * Wraps function with given handlers
