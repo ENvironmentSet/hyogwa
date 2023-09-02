@@ -35,7 +35,6 @@ unsafeRunSync(main(), {
   }
 })
 ```
-[Try hyogwa in stackblitz!](https://stackblitz.com/edit/typescript-3mavlr?file=index.ts)
 
 No more suspicious wrapper functions, no more mess with pipelines, no more scary types. 
 Just plain typescript functions, and plain typescript functions only.
