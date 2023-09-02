@@ -174,7 +174,7 @@ export function createPrimitive(effectName: string, constructorName: string) {
         if (isTerminated) return { value: void 0, done: true }
         else if (isCalled) {
           isTerminated = true
-          return { value: resolution, done: true }
+          return { value: resolution[0], done: true }
         } else {
           isCalled = true
           return { value: { construction: `${effectName}.${constructorName}`, parameters }, done: false }
