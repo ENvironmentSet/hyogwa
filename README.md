@@ -1,8 +1,8 @@
 # hyogwa — Natural 🌿 effect system that fits TypeScript
 
 ```typescript
-import { Effect, createPrimitives } from 'hyogwa/core';
-import { unsafeRunSync } from 'hyogwa/runners';
+import { Effect, createPrimitives } from 'hyogwa/core'
+import { unsafeRunSync } from 'hyogwa/runners'
 
 // Define own IO effect
 
