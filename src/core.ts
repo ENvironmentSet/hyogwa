@@ -392,6 +392,7 @@ function* _handle<E extends Effects, R, const H extends Partial<Handlers<E, R>>>
           abort(value) {
             if (isCodeHandled) throw new HandleError(code, 'cannot call handle tactics more than once')
 
+            computation.return(value)
             result = value
             aborted = true
             isCodeHandled = true
