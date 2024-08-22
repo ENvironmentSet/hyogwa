@@ -19,7 +19,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "rm -rf ./dist; tsc",
-    "prepare": "npm run build"
+    "prepare": "bun run build"
   },
   "repository": {
     "type": "git",
